@@ -2,13 +2,10 @@
 
 #include "ParticleSystem.h"
 
-//Particle System class - Stanford method paper
-//It builds a grid of particles (represented by Particle objects)
-//These are then held together by springs using hooke's laws.  One edge corresponds to each spring.
-//Hooke's law is used to represent the springs, with both a spring component and a damping comopnent
-//Implicit methods are used for the integration.  This requires a solving system but allows much larger spring constants without instability
-//and potentially allows more efficient implementation
-//A gravity component is also present
+//Particle System class - Deformation Method #3
+//
+//Based on the paper at http://www-ljk.imag.fr/Publications/Basilic/com.lmc.publi.PUBLI_Article@11f6a0378d9_18c74/tensile.pdf – Simple, yet Accurate Nonlinear Tensile Stiffness
+//Pascal Volino et. al
 class NonlinearMethodSystem : public ParticleSystem
 {
 	public:

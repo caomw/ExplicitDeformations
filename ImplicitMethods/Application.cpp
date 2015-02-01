@@ -26,9 +26,16 @@
 //Written by Chris Jacobsen with advisement from Professor Huamin Wang
 
 //Based on:
-//http://graphics.snu.ac.kr/~kjchoi/publication/cloth.pdf - Explicit and implicit formulas for hooke's law - page 3
-//http://www.amath.unc.edu/Faculty/mucha/Reprints/SCAclothcontrolpreprint.pdf - Formulas for A and b in Ax = b system - page 5
-//http://en.wikipedia.org/wiki/Conjugate_gradient - Algorithm for conjugate gradient (solves Ax = b)
+//Deformation Papers:
+//http://www.math.ucla.edu/~jteran/papers/TSNF03.pdf – Finite Volume Methods for the Simulation of Skeletal Muscle
+//By R. Fedkiw et. al
+//Deformation Method #1 - Class Stanford System
+//http://graphics.berkeley.edu/papers/Obrien-GMA-1999-08/Obrien-GMA-1999-08.pdf – Graphical Modeling and Animation of Brittle Fracture
+//By James O'Brien and Jessica Hodgkins
+//Deformation Method #2 - Class GeorgiaInstituteSystem
+//http://www-ljk.imag.fr/Publications/Basilic/com.lmc.publi.PUBLI_Article@11f6a0378d9_18c74/tensile.pdf – Simple, yet Accurate Nonlinear Tensile Stiffness
+//Pascal Volino et. al
+//Deformation Method #3 - Class NonlinearMethodSystem
 
 #include <gl/glut.h>
 #include <gl/GLU.H>
@@ -44,9 +51,6 @@
 #include "TetraMeshReader.h"
 
 using namespace std;
-
-//Matlab reference:
-//See: F:\8998\Deformations\Matlab3D\UnifiedFramework\versionI2 - Perf Enh 2
 
 //Note: the reason these were declared globally is to accommodate Glut's function calling system
 ParticleSystem * particleSystem;	//The main particle system
