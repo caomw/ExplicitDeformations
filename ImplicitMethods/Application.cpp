@@ -57,7 +57,7 @@ ParticleSystem * particleSystem;	//The main particle system
 ViewManager viewManager;			//Instance of the view manager to allow user view control
 Keyboard * keyboard;				//Instance of the Keyboard class to process key presses
 Logger * logger;					//Instance of Logger class to perform all logging
-const int whichMethod = 3;			//1 for stanford method.  2 for georgia Institute Method.  3 for NonLinear Paper method.
+const int whichMethod = 1;			//1 for stanford method.  2 for georgia Institute Method.  3 for NonLinear Paper method.
 
 //This function is called for rendering by GLUT
 void render()
@@ -77,13 +77,13 @@ void render()
 	switch (whichMethod)
 	{
 	case 1:					//Stanford Method
-		timeElapsed = 0.005;
+		timeElapsed = 0.00225;
 		break;
 	case 2:					//Georgia Institute Method
-		timeElapsed = 0.005;
+		timeElapsed = 0.00225;
 		break;
 	case 3:					//Non Linear Paper Method
-		timeElapsed = 0.0035;
+		timeElapsed = 0.00225;
 		break;
 	default:
 		timeElapsed = 0.005;
@@ -205,12 +205,12 @@ int main(int argCount, char **argValue)
 	int * tetraList = NULL;
 	TetraMeshReader theReader;
 	//if (theReader.openFile("hack.node", "hack.ele"))
-	//if (theReader.openFile("house2.node", "house2.ele"))
+	if (theReader.openFile("house2.node", "house2.ele"))
 	//if (theReader.openFile("dragon.node", "dragon.ele"))
 	// (theReader.openFile("chris.node", "chris.ele"))
 	//if (theReader.openFile("chris2.node", "chris2.ele"))
 	//if (theReader.openFile("chris4.node", "chris4.ele"))
-	if (theReader.openFile("chrisSimpler.node", "chrisSimpler.ele"))
+	//if (theReader.openFile("chrisSimpler.node", "chrisSimpler.ele"))
 	{
 		bool loadSucceeded = theReader.loadData(vertexList, vertexCount, tetraList, tetraCount, logger);
 		
