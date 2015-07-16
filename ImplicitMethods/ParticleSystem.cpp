@@ -103,7 +103,7 @@ ParticleSystem::ParticleSystem(Vertex * vertexList, int vertexCount, int * tetra
 
 	normals = new double[DIMENSION * numTetra * 4];
 
-	vertexNormals = new double [DIMENSION * numVertices];
+	//vertexNormals = new double [(DIMENSION + 1) * numVertices];
 	tetraCounts = new int [numVertices];
 
 	massMatrix = new double [numVertices];
@@ -397,6 +397,7 @@ void ParticleSystem::calculateNormals()
 		for (int j = 0; j < DIMENSION; j++)
 		{
 			normals[numVertices * j + i] = 0;
+			defVertices[i].vertexNormal[j] = 0;
 		}
 		tetraCounts[i] = 0;
 	}
@@ -414,9 +415,12 @@ void ParticleSystem::calculateNormals()
 
 		for (int i = 0; i < DIMENSION; i++)
 		{
-			vertexNormals[i * numVertices + tetraList[3 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[1 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[0 * numTetra + currentTetrad]] += crossProductResult[i];
+			defVertices[tetraList[3 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[1 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[0 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[3 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[1 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[0 * numTetra + currentTetrad]] += crossProductResult[i];
 		}
 		tetraCounts[tetraList[3 * numTetra + currentTetrad]]++;
 		tetraCounts[tetraList[1 * numTetra + currentTetrad]]++;
@@ -437,9 +441,12 @@ void ParticleSystem::calculateNormals()
 
 		for (int i = 0; i < DIMENSION; i++)
 		{
-			vertexNormals[i * numVertices + tetraList[2 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[1 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[3 * numTetra + currentTetrad]] += crossProductResult[i];
+			defVertices[tetraList[2 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[1 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[3 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[2 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[1 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[3 * numTetra + currentTetrad]] += crossProductResult[i];
 		}
 		tetraCounts[tetraList[2 * numTetra + currentTetrad]]++;
 		tetraCounts[tetraList[1 * numTetra + currentTetrad]]++;
@@ -459,9 +466,12 @@ void ParticleSystem::calculateNormals()
 
 		for (int i = 0; i < DIMENSION; i++)
 		{
-			vertexNormals[i * numVertices + tetraList[2 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[3 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[0 * numTetra + currentTetrad]] += crossProductResult[i];
+			defVertices[tetraList[2 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[3 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[0 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[2 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[3 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[0 * numTetra + currentTetrad]] += crossProductResult[i];
 		}
 		tetraCounts[tetraList[2 * numTetra + currentTetrad]]++;
 		tetraCounts[tetraList[3 * numTetra + currentTetrad]]++;
@@ -481,9 +491,12 @@ void ParticleSystem::calculateNormals()
 
 		for (int i = 0; i < DIMENSION; i++)
 		{
-			vertexNormals[i * numVertices + tetraList[0 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[1 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[2 * numTetra + currentTetrad]] += crossProductResult[i];
+			defVertices[tetraList[0 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[1 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[2 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[0 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[1 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[2 * numTetra + currentTetrad]] += crossProductResult[i];
 		}
 		tetraCounts[tetraList[0 * numTetra + currentTetrad]]++;
 		tetraCounts[tetraList[1 * numTetra + currentTetrad]]++;
@@ -501,15 +514,18 @@ void ParticleSystem::calculateNormals()
 		double magnitude = 0;
 		for (int j = 0; j < DIMENSION; j++)
 		{
-			vertexNormals[j * numVertices + i] /= tetraCounts[i];  //Find average direction of all normals for adjacent triangles
-			magnitude += vertexNormals[j * numVertices + i] * vertexNormals[j * numVertices + i];
+			defVertices[i].vertexNormal[j] /= tetraCounts[i];
+			//vertexNormals[j * numVertices + i] /= tetraCounts[i];  //Find average direction of all normals for adjacent triangles
+			magnitude += defVertices[i].vertexNormal[j] * defVertices[i].vertexNormal[j];
+			//magnitude += vertexNormals[j * numVertices + i] * vertexNormals[j * numVertices + i];
 		}
 
 		magnitude = sqrt(magnitude);
 
 		for (int j = 0; j < DIMENSION; j++)
 		{
-			vertexNormals[j * numVertices + i] /= magnitude;  //Normalize the normal to be unit length
+			defVertices[i].vertexNormal[j] /= magnitude;
+			//vertexNormals[j * numVertices + i] /= magnitude;  //Normalize the normal to be unit length
 		}
 		
 	}
@@ -675,37 +691,68 @@ void ParticleSystem::doRender(double videoWriteDeltaT)
 
 		glColor3f(myTetraColor, 1.0, 0.0f);
 		glBegin(GL_TRIANGLES);
+		
+		
+		int normalVertex = 0;
 		//Counter clockwise winding
 		//Triangle 1
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
+
+		normalVertex = tetraList[3 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[3 * numTetra + i]].position[0], defVertices[tetraList[3 * numTetra + i]].position[1], defVertices[tetraList[3 * numTetra + i]].position[2]);  //vertex 3
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
+		normalVertex = tetraList[1 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[1 * numTetra + i]].position[0], defVertices[tetraList[1 * numTetra + i]].position[1], defVertices[tetraList[1 * numTetra + i]].position[2]);  //vertex 1
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
+		normalVertex = tetraList[0 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[0 * numTetra + i]].position[0], defVertices[tetraList[0 * numTetra + i]].position[1], defVertices[tetraList[0 * numTetra + i]].position[2]);  //vertex 0
 		
+
 		glColor3f(myTetraColor, 0.8f, 0.0f);
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
+		normalVertex = tetraList[2 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[2 * numTetra + i]].position[0], defVertices[tetraList[2 * numTetra + i]].position[1], defVertices[tetraList[2 * numTetra + i]].position[2]);  //vertex 2
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
+		normalVertex = tetraList[1 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[1 * numTetra + i]].position[0], defVertices[tetraList[1 * numTetra + i]].position[1], defVertices[tetraList[1 * numTetra + i]].position[2]);  //vertex 1
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
+		normalVertex = tetraList[3 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[3 * numTetra + i]].position[0], defVertices[tetraList[3 * numTetra + i]].position[1], defVertices[tetraList[3 * numTetra + i]].position[2]);  //vertex 3
+
 
 		glColor3f(myTetraColor, 0.6f, 0.0f);
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
+		normalVertex = tetraList[2 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[2 * numTetra + i]].position[0], defVertices[tetraList[2 * numTetra + i]].position[1], defVertices[tetraList[2 * numTetra + i]].position[2]);  //vertex 2
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
+		normalVertex = tetraList[3 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[3 * numTetra + i]].position[0], defVertices[tetraList[3 * numTetra + i]].position[1], defVertices[tetraList[3 * numTetra + i]].position[2]);  //vertex 3
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
+		normalVertex = tetraList[0 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[0 * numTetra + i]].position[0], defVertices[tetraList[0 * numTetra + i]].position[1], defVertices[tetraList[0 * numTetra + i]].position[2]);  //vertex 0
 
+
 		glColor3f(myTetraColor, 0.4f, 0.0f);
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
+		normalVertex = tetraList[0 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[0 * numTetra + i]].position[0], defVertices[tetraList[0 * numTetra + i]].position[1], defVertices[tetraList[0 * numTetra + i]].position[2]);  //vertex 0
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
+		normalVertex = tetraList[1 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[1 * numTetra + i]].position[0], defVertices[tetraList[1 * numTetra + i]].position[1], defVertices[tetraList[1 * numTetra + i]].position[2]);  //vertex 1
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
+		normalVertex = tetraList[2 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[2 * numTetra + i]].position[0], defVertices[tetraList[2 * numTetra + i]].position[1], defVertices[tetraList[2 * numTetra + i]].position[2]);  //vertex 2
 
 		glEnd();

@@ -59,7 +59,7 @@ class ParticleSystem
 	vector<int> indices;				//Mesh indices
 	
 	double * normals;					//Array holding all face normals (if used)
-	double * vertexNormals;				//Normals for LIGHTING
+	//double * vertexNormals;				//Normals for LIGHTING
 	int * tetraCounts;					//Array holding number of tetrahedra adjacent to each vertex (used for normal averaging)
 
 	//Deformation data
