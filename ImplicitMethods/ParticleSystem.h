@@ -114,5 +114,20 @@ protected:
 
 	GLuint programObject;				//Program object needed for shaders (notably lighting)
 	GLfloat eyePos[3];		  //Position of the eye (for the camera)
+
+	GLfloat lightAmbient[4];  //Normal ambient light setting
+	GLfloat lightDiffuse[4];  //Diffuse light setting
+	GLfloat lightSpecular[4]; //Specular light setting
+	GLfloat lightPosition[4]; //Light position setting
+	GLfloat lightColor[4];  //Light color
+
+	GLfloat matAmbient[4];    //Material ambient setting
+	GLfloat matDiffuse[4];    //Material diffuse setting
+	GLfloat matSpecular[4];   //Material specular setting
+	GLfloat matShininess[1];  //Material shininess setting
+
+	GLfloat lightFullAmbient[4];  //Special "full" ambient setting for debugging
+
+	bool ambientMode;
 	
 };

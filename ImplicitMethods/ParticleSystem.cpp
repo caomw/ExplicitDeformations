@@ -161,11 +161,61 @@ ParticleSystem::ParticleSystem(Vertex * vertexList, int vertexCount, int * tetra
 	}
 	#endif
 
-	
+	////////////////////////////LIGHTING////////////////////////////////////////////////
 	//If lighting is calculated in eye space, the eye position basically is the origin - use this for the default
 	eyePos[0] = 0.0f;
 	eyePos[1] = 0.0f;
 	eyePos[2] = 0.0f;
+
+	lightAmbient[0] = 0.05; //Some ambient but not much at all
+	lightAmbient[1] = 0.05;
+	lightAmbient[2] = 0.05;
+	
+	lightFullAmbient[0] = 0.9; //Lots of ambient - useful for debugging in wireframe mode
+	lightFullAmbient[1] = 0.9;
+	lightFullAmbient[2] = 0.9;
+	lightFullAmbient[3] = 1;
+
+	lightDiffuse[0] = 0.8;
+	lightDiffuse[1] = 0.8;
+	lightDiffuse[2] = 0.8;
+	
+	lightDiffuse[3] = 1;
+
+	lightSpecular[0] = 1;
+	lightSpecular[1] = 1;
+	lightSpecular[2] = 1;
+	lightSpecular[3] = 1;
+
+	lightPosition[0] = 0;
+	lightPosition[1] = 0;
+	lightPosition[2] = 1;
+	lightPosition[3] = 1;
+
+	matAmbient[0] = 1.0;
+	matAmbient[1] = 1.0;
+	matAmbient[2] = 1.0;
+	matAmbient[3] = 1;
+
+	matDiffuse[0] = 1;
+	matDiffuse[1] = 1;
+	matDiffuse[2] = 1;
+	matDiffuse[3] = 1;
+
+	matSpecular[0] = 0.9;
+	matSpecular[1] = 0.9;
+	matSpecular[2] = 0.9;
+	matSpecular[3] = 1;
+
+	lightColor[0] = 1.0f;
+	lightColor[1] = 0.1f;
+	lightColor[2] = 0.1f;
+	lightColor[3] = 1.0f;
+
+	//matShininess[0] = 30;
+	matShininess[0] = 10000; //Based on MazeGenerator.cpp code
+
+	ambientMode = false;
 }
 
 //Destructor - free all memory for dynamically allocated arrays
@@ -990,8 +1040,8 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 	//////////////
 
 	glEnableVertexAttribArray(c0); 
-	//glEnableVertexAttribArray(c1);
-    //glEnableVertexAttribArray(c2); 
+	glEnableVertexAttribArray(c1);
+    glEnableVertexAttribArray(c2); 
 
 	glBindBuffer(GL_ARRAY_BUFFER, vboHandle[0]);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVboHandle[0]);
@@ -1002,23 +1052,23 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 
 	//If in ambient mode, add extra ambience to make things really bright
 	//Otherwise use normal ambience
-	//if (ambientMode)
-	//{
-	//	glUniform4f(l1, lightAmbient[0], lightAmbient[1], lightFullAmbient[2], 1.0);
-	//}
-	//else
-	//{
-	//	glUniform4f(l1, lightAmbient[0], lightAmbient[1], lightAmbient[2], 1.0);
-	//}
-	//glUniform4f(l2, lightDiffuse[0], lightDiffuse[1], lightDiffuse[2], 1.0);
-	//glUniform4f(l3, lightSpecular[0], lightSpecular[1], lightSpecular[2],1.0);
-	//glUniform4f(lp, lightPosition[0], lightPosition[1], lightPosition[2], lightPosition[3]);
+	if (ambientMode)
+	{
+		glUniform4f(l1, lightAmbient[0], lightAmbient[1], lightFullAmbient[2], 1.0);
+	}
+	else
+	{
+		glUniform4f(l1, lightAmbient[0], lightAmbient[1], lightAmbient[2], 1.0);
+	}
+	glUniform4f(l2, lightDiffuse[0], lightDiffuse[1], lightDiffuse[2], 1.0);
+	glUniform4f(l3, lightSpecular[0], lightSpecular[1], lightSpecular[2],1.0);
+	glUniform4f(lp, lightPosition[0], lightPosition[1], lightPosition[2], lightPosition[3]);
 	glUniform4f(ep, eyePos[0], eyePos[1], eyePos[2], 1); 
 
-	//glUniform4f(d1, matAmbient[0], matAmbient[1], matAmbient[2], 1.0);
-	//glUniform4f(d2, matDiffuse[0], matDiffuse[1], matDiffuse[2], 1.0);
-	//glUniform4f(d3, matSpecular[0], matSpecular[1], matSpecular[2],1.0);
-	//glUniform1f(d4, matShininess[0]);
+	glUniform4f(d1, matAmbient[0], matAmbient[1], matAmbient[2], 1.0);
+	glUniform4f(d2, matDiffuse[0], matDiffuse[1], matDiffuse[2], 1.0);
+	glUniform4f(d3, matSpecular[0], matSpecular[1], matSpecular[2],1.0);
+	glUniform1f(d4, matShininess[0]);
 
 	glUniformMatrix4fv(m1, 1, GL_FALSE, &totalMatrix[0][0]);
 	glUniformMatrix4fv(m2, 1, GL_FALSE, &modelViewMatrix[0][0]);
