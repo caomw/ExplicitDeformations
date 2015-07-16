@@ -11,8 +11,8 @@ struct Vertex
 		position[DIMENSION] = 1;
 		velocity[DIMENSION] = 1;
 	}
-	double position [DIMENSION + 1];	//Position vector in 3d space
-	double velocity [DIMENSION + 1];	//Velocity vector in 3d space	
+	float position [DIMENSION + 1];	//Position vector in 3d space
+	float velocity [DIMENSION + 1];	//Velocity vector in 3d space	
 	//double normal [DIMENSION];		//Normal vector in 3d space (this one is a VERTEX AVERAGE used in lighting)
 	int triangleCount;				//Number of triangles in which the vertex for this particle is contained (helps calculate normals)
 };
