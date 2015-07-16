@@ -751,7 +751,8 @@ int main()
 	Vertex * vertexList = NULL;
 	int * tetraList = NULL;
 	TetraMeshReader theReader;
-	if (theReader.openFile("house2.node", "house2.ele"))
+	//if (theReader.openFile("house2.node", "house2.ele"))
+	if (theReader.openFile("chrisSimpler.node", "chrisSimpler.ele"))
 	{
 		bool loadSucceeded = theReader.loadData(vertexList, vertexCount, tetraList, tetraCount, logger);
 		
