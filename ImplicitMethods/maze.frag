@@ -40,5 +40,6 @@ void main() {
 	vec4 finalColor = (ambient + diffuse + specular) * pcolor;
 
     gl_FragColor = finalColor; 
-	
+	//gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+
  } 

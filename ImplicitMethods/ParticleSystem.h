@@ -24,6 +24,8 @@ class ParticleSystem
 	public:
 	ParticleSystem(Vertex * vertexList, int vertexCount, int * tetraList, int tetraCount, Logger * logger);
 	~ParticleSystem();
+	void initVBOs();
+	void sendVBOs();
 	void reset();
 	virtual void doUpdate(double elapsedSeconds);
 	void doCollisionDetectionAndResponse(double deltaT);
@@ -41,7 +43,9 @@ class ParticleSystem
 	void doTransform();
 	void printStateReport();
 	void loadSpecialState();
-		
+	void setProgramObject(GLuint programObject) {this->programObject = programObject;}
+	void setEyePos(glm::vec3 & eyePos);
+
 	protected:
 	double halfWidth;					//Half the width of the original grid.  Used to make the grid initially be centered.
 	double halfHeight;					//Half the hight of the original grid.  Used to make the grid initially be centered.
@@ -52,6 +56,7 @@ class ParticleSystem
 	Vertex * orgVertices;				//Original set of vertices (undeformed)
 	Vertex * defVertices;				//Deformed set of vertices
 	int numVertices;					//Number of particles in the system
+	vector<int> indices;				//Mesh indices
 	
 	double * normals;					//Array holding all face normals (if used)
 	double * vertexNormals;				//Normals for LIGHTING
@@ -102,6 +107,11 @@ protected:
 	char imageFileName[100];			//Name of output image file
 	double timeSinceVideoWrite;			//Number of seconds elapsed since a frame was written to an image file
 
-	Logger * logger;					//Reference to Logger class to perform all 
+	Logger * logger;					//Reference to Logger class to perform all
+
+	GLuint vboHandle[1];	  //handle to vertex buffer object for vertices
+	GLuint indexVboHandle[1]; //handle to vertex buffer object for indices
+	GLuint programObject;				//Program object needed for shaders (notably lighting)
+	GLfloat eyePos[3];		  //Position of the eye (for the camera)
 	
 };

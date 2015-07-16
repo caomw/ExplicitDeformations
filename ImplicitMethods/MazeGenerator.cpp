@@ -788,7 +788,6 @@ int main()
 		return 1;
 	}
 
-	
 	///////////////////
 
 	srand(time(0));  //Seed random numbers based on current time
@@ -847,10 +846,18 @@ int main()
 	greenCube2.initVBO();
 	greenCube2.setShininess(5000);
 
+	//////////////Deformations code
+	particleSystem->initVBOs();
+	particleSystem->setProgramObject(programObject);
+	/////////////////////////////////
+
 	glutMainLoop();
 
+	/////////////////
+	//Deformations code
 	delete particleSystem;
 	delete logger;
+	////////////////
 	
 	return 0;
 }
