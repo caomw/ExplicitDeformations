@@ -194,6 +194,7 @@ void keyReleased (unsigned char key, int mystery, int mystery2)
 	keyboard -> keyReleased(key);
 }
 
+/*
 //Main function
 int main(int argCount, char **argValue)
 {
@@ -310,3 +311,4 @@ int main(int argCount, char **argValue)
 	delete logger;
 
 }
+*/

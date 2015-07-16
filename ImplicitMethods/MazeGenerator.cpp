@@ -672,7 +672,7 @@ void resize2(int windowWidth, int windowHeight)
 	glutPostRedisplay();
 }
 
-/*
+
 //Main function
 int main()
 {
@@ -734,4 +734,3 @@ int main()
 	glutMainLoop();
 	return 0;
 }
-*/
