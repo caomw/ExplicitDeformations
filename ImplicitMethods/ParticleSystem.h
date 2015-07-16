@@ -111,6 +111,7 @@ protected:
 
 	GLuint vboHandle[1];	  //handle to vertex buffer object for vertices
 	GLuint indexVboHandle[1]; //handle to vertex buffer object for indices
+
 	GLuint programObject;				//Program object needed for shaders (notably lighting)
 	GLfloat eyePos[3];		  //Position of the eye (for the camera)
 	

@@ -196,7 +196,7 @@ void keyReleased (unsigned char key, int mystery, int mystery2)
 
 
 //Main function
-int main(int argCount, char **argValue)
+int main2(int argCount, char **argValue)
 {
 	logger = new Logger();
 

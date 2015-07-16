@@ -741,7 +741,7 @@ void resize2(int windowWidth, int windowHeight)
 
 
 //Main function
-int main2()
+int main()
 {
 	////////////////////
 	//Deformations Code
