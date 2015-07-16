@@ -13,11 +13,14 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Maze_Header_Files">
+      <UniqueIdentifier>{35332dd5-20e4-4311-a40a-fb9212a1a1c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Maze_Source_Files">
+      <UniqueIdentifier>{daf21dc5-04d7-4272-ba2b-fa8b7ac767ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Particle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -50,6 +53,27 @@
     </ClCompile>
     <ClCompile Include="TetraMeshReader.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderSetup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MazeGenerator.cpp">
+      <Filter>Maze_Source_Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Maze_Source_Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sphere.cpp">
+      <Filter>Maze_Source_Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Cube.cpp">
+      <Filter>Maze_Source_Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Cylinder.cpp">
+      <Filter>Maze_Source_Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +109,21 @@
     </ClInclude>
     <ClInclude Include="TetraMeshReader.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
+      <Filter>Maze_Header_Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cylinder.h">
+      <Filter>Maze_Header_Files</Filter>
+    </ClInclude>
+    <ClInclude Include="globals.h">
+      <Filter>Maze_Header_Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Maze_Header_Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.h">
+      <Filter>Maze_Header_Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
