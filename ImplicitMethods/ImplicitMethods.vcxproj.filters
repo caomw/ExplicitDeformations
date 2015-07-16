@@ -169,5 +169,11 @@
     <None Include="chrisSimpler.node">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="maze.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="maze.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

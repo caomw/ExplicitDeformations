@@ -719,7 +719,11 @@ void render2()
 	
 	////////////////////////////////////////
 	//Deformations code
-	particleSystem -> doRender(timeElapsed * 4, projMatrix, modelViewMatrix);
+	const float SCALEFACTOR = 0.05f;
+	mat4 tetraMatrix = scale(modelViewMatrix, vec3(SCALEFACTOR, SCALEFACTOR, SCALEFACTOR));
+
+
+	particleSystem -> doRender(timeElapsed * 4, projMatrix, tetraMatrix);
 	///////////////////////////////////////////
 
 	glutSwapBuffers();
@@ -747,7 +751,8 @@ int main()
 	Vertex * vertexList = NULL;
 	int * tetraList = NULL;
 	TetraMeshReader theReader;
-	if (theReader.openFile("house2.node", "house2.ele"))
+	//if (theReader.openFile("house2.node", "house2.ele"))
+	if (theReader.openFile("chrisSimpler.node", "chrisSimpler.ele"))
 	{
 		bool loadSucceeded = theReader.loadData(vertexList, vertexCount, tetraList, tetraCount, logger);
 		
@@ -788,7 +793,6 @@ int main()
 		return 1;
 	}
 
-	
 	///////////////////
 
 	srand(time(0));  //Seed random numbers based on current time
@@ -847,10 +851,18 @@ int main()
 	greenCube2.initVBO();
 	greenCube2.setShininess(5000);
 
+	//////////////Deformations code
+	particleSystem->initVBOs();
+	particleSystem->setProgramObject(programObject);
+	/////////////////////////////////
+
 	glutMainLoop();
 
+	/////////////////
+	//Deformations code
 	delete particleSystem;
 	delete logger;
+	////////////////
 	
 	return 0;
 }
