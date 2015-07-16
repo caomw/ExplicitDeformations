@@ -719,7 +719,11 @@ void render2()
 	
 	////////////////////////////////////////
 	//Deformations code
-	particleSystem -> doRender(timeElapsed * 4, projMatrix, modelViewMatrix);
+	const float SCALEFACTOR = 0.05f;
+	mat4 tetraMatrix = scale(modelViewMatrix, vec3(SCALEFACTOR, SCALEFACTOR, SCALEFACTOR));
+
+
+	particleSystem -> doRender(timeElapsed * 4, projMatrix, tetraMatrix);
 	///////////////////////////////////////////
 
 	glutSwapBuffers();
