@@ -716,6 +716,11 @@ void render2()
 	modelViewMatrix = viewingMatrix * modelingMatrix;
 	vec4 robotPos = vec4(convertMazeXToGLCoord(userPos.x), 0, -convertMazeYToGLCoord(userPos.y), 1);
 	drawRobot(projMatrix, modelViewMatrix);
+	
+	////////////////////////////////////////
+	//Deformations code
+	particleSystem -> doRender(timeElapsed * 4, projMatrix, modelViewMatrix);
+	///////////////////////////////////////////
 
 	glutSwapBuffers();
 	
@@ -809,6 +814,7 @@ int main()
 	glutInitWindowSize(1000,800);
 	glutCreateWindow("Maze Generator 3D");
 	glutDisplayFunc(render2);
+	glutIdleFunc(render2);
 	glutKeyboardFunc(keyBoardHandler);
 	glutReshapeFunc(resize2);
 	glutMouseFunc(mymouse); 

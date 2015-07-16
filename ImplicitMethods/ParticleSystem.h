@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
 #include <gl/glut.h>
 #include <gl/GLU.H>
 #include <vector>
@@ -27,6 +29,7 @@ class ParticleSystem
 	void doCollisionDetectionAndResponse(double deltaT);
 	void calculateNormals();
 	void doRender(double videoWriteDeltaT);
+	void doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & modelViewMatrix);
 	//UI Methods
 	void increaseEarthGravity(double amount);
 	void increaseStraightRestLength(double amount);
