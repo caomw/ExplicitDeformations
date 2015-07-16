@@ -8,9 +8,24 @@
 //VBO code based on Han Wei Shen's code from class at http://www.cse.ohio-state.edu/~hwshen/5542/Site/Slides_files/FFPtriangleVBOindex.cpp
 //Lighting Algorithms based on http://www.cse.ohio-state.edu/~hwshen/5542/Site/Slides_files/shading_glsl.pdf and the code presented by GTA Souyma Dutta in class
 
+#include <gl/glew.h>
+
+//////////////////////////
+//Deformations code
+#include <string>
+#include <sstream>
+#include <iostream>
+#include "StanfordSystem.h"
+#include "GeorgiaInstituteSystem.h"
+#include "NonlinearMethodSystem.h"
+#include "ViewManager.h"
+#include "Keyboard.h"
+#include "TetraMeshReader.h"
+//////////////////////////
+
 #include <time.h>
 #include <stdlib.h>
-#include <gl/glew.h>
+
 #include <gl/glut.h>
 #include <gl/GL.h>
 #include <glm/glm.hpp>
@@ -24,6 +39,17 @@
 #include "Sphere.h"
 #include "Cylinder.h"
 #include "Cube.h"
+
+//////
+//Deformations Code
+//Note: the reason these were declared globally is to accommodate Glut's function calling system
+extern ParticleSystem * particleSystem;	//The main particle system
+extern ViewManager viewManager;			//Instance of the view manager to allow user view control
+extern Keyboard * keyboard;				//Instance of the Keyboard class to process key presses
+extern Logger * logger;					//Instance of Logger class to perform all logging
+extern const int whichMethod = 1;			//1 for stanford method.  2 for georgia Institute Method.  3 for NonLinear Paper method.
+///////
+
 
 GLuint SetupGLSL(char *fileName);
 
@@ -545,6 +571,38 @@ void drawSphereOnStand(mat4 & projMatrix, mat4 & modelViewMatrix)
 //Render function (AKA display function)
 void render2()
 {
+	/////////////////
+	//Deformations code
+	
+	//Update Logic
+	double timeElapsed;
+
+	switch (whichMethod)
+	{
+	case 1:					//Stanford Method
+		timeElapsed = 0.00225;
+		break;
+	case 2:					//Georgia Institute Method
+		timeElapsed = 0.00225;
+		break;
+	case 3:					//Non Linear Paper Method
+		timeElapsed = 0.00225;
+		break;
+	default:
+		timeElapsed = 0.005;
+		break;
+	}
+
+	for (int i = 0; i < 10; i++)
+	{				
+		particleSystem -> doUpdate(timeElapsed);
+	}
+
+	//startTime = glutGet(GLUT_ELAPSED_TIME);
+		
+	particleSystem -> calculateNormals();
+	///////////////////end of deformations code///////////////
+
 	glClearColor(0.0, 0,0, 0.0);
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -676,6 +734,58 @@ void resize2(int windowWidth, int windowHeight)
 //Main function
 int main()
 {
+	////////////////////
+	//Deformations Code
+	logger = new Logger();
+	int vertexCount = 0;
+	int tetraCount = 0;
+	Vertex * vertexList = NULL;
+	int * tetraList = NULL;
+	TetraMeshReader theReader;
+	if (theReader.openFile("house2.node", "house2.ele"))
+	{
+		bool loadSucceeded = theReader.loadData(vertexList, vertexCount, tetraList, tetraCount, logger);
+		
+		theReader.closeFile();
+
+		if (loadSucceeded && vertexList != NULL && tetraList != NULL)
+		{
+			switch(whichMethod)
+			{
+			case 1:
+				particleSystem = new StanfordSystem(vertexList, vertexCount, tetraList, tetraCount, logger);
+				break;
+			case 2:
+				particleSystem = new GeorgiaInstituteSystem(vertexList, vertexCount, tetraList, tetraCount, logger);
+				break;
+			case 3:
+				particleSystem = new NonlinearMethodSystem(vertexList, vertexCount, tetraList, tetraCount, logger);
+				break;
+			default:
+				cerr << "Incorrect system identifier -- defaulting to stanford system" << endl;
+				particleSystem = new StanfordSystem(vertexList, vertexCount, tetraList, tetraCount, logger);
+				break;
+			}
+
+			//particleSystem -> loadSpecialState();
+		}
+		else
+		{
+			cerr << "Program cannot run with error in loading input data contents" << endl;
+			system("pause");
+			return 1;
+		}
+	}
+	else
+	{
+		cerr << "Unable to execute program without input data" << endl;
+		system("pause");
+		return 1;
+	}
+
+	
+	///////////////////
+
 	srand(time(0));  //Seed random numbers based on current time
 	
 	//Set maze start and goal points
@@ -732,5 +842,9 @@ int main()
 	greenCube2.setShininess(5000);
 
 	glutMainLoop();
+
+	delete particleSystem;
+	delete logger;
+	
 	return 0;
 }
