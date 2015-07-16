@@ -102,7 +102,7 @@ bool TetraMeshReader::loadData(Vertex *& vertexList, int & vertexCount, int *& t
 			}
 
 			vertexList[vertexNumber].velocity[i] = 0;
-			vertexList[vertexNumber].normal[i] = 0;
+			//vertexList[vertexNumber].normal[i] = 0;
 		}
 		if (!nodeFile)
 		{
