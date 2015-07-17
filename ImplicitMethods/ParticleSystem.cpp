@@ -165,7 +165,7 @@ ParticleSystem::ParticleSystem(Vertex * vertexList, int vertexCount, int * tetra
 	//If lighting is calculated in eye space, the eye position basically is the origin - use this for the default
 	eyePos[0] = 0.0f;
 	eyePos[1] = 0.0f;
-	eyePos[2] = 0.0f;
+	eyePos[2] = -5.0f;
 
 	lightAmbient[0] = 0.05; //Some ambient but not much at all
 	lightAmbient[1] = 0.05;
@@ -182,9 +182,13 @@ ParticleSystem::ParticleSystem(Vertex * vertexList, int vertexCount, int * tetra
 	
 	lightDiffuse[3] = 1;
 
-	lightSpecular[0] = 1;
-	lightSpecular[1] = 1;
-	lightSpecular[2] = 1;
+	//Turning off specular for now unless it's needed (and verified as good looking)
+	//lightSpecular[0] = 1;
+	//lightSpecular[1] = 1;
+	//lightSpecular[2] = 1;
+	lightSpecular[0] = 0;
+	lightSpecular[1] = 0;
+	lightSpecular[2] = 0;
 	lightSpecular[3] = 1;
 
 	lightPosition[0] = 0;
@@ -212,9 +216,8 @@ ParticleSystem::ParticleSystem(Vertex * vertexList, int vertexCount, int * tetra
 	lightColor[2] = 0.1f;
 	lightColor[3] = 1.0f;
 
-	//matShininess[0] = 30;
-	matShininess[0] = 10000; //Based on MazeGenerator.cpp code
-
+	matShininess[0] = 10000;
+	
 	ambientMode = false;
 }
 

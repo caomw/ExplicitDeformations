@@ -50,7 +50,7 @@ Mesh::Mesh()
 	//If lighting is calculated in eye space, the eye positiion basically is the origin - use this for the default
 	eyePos[0] = 0.0f;
 	eyePos[1] = 0.0f;
-	eyePos[2] = 0.0f;
+	eyePos[2] = -5.0f;
 
 	lightColor[0] = 1.0f;
 	lightColor[1] = 0.1f;
