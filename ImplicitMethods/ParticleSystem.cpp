@@ -1184,7 +1184,7 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 	}
 	else
 	{
-		glUniform4f(l1, lightAmbient[0], lightAmbient[1], lightAmbient[2], 1.0);
+		glUniform4f(l1, 0.125, 0.125, 0.125, 1.0);
 	}
 	glUniform4f(l2, lightDiffuse[0], lightDiffuse[1], lightDiffuse[2], 1.0);
 	glUniform4f(l3, lightSpecular[0], lightSpecular[1], lightSpecular[2],1.0);
