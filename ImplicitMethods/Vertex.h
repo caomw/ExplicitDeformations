@@ -44,10 +44,3 @@ struct Vertex
 	int triangleCount;				//Number of triangles in which the vertex for this particle is contained (helps calculate normals)
 };
 
-//Vertex Struct - position, normal, and color for one vertex in a mesh
-struct VertexB
-{
-	float position[4];
-	float normal [4];
-	float color[4];
-};

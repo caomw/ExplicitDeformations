@@ -83,35 +83,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
-    <ClCompile Include="Cube.cpp" />
-    <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="GeorgiaInstituteSystem.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Macros.cpp" />
-    <ClCompile Include="MazeGenerator.cpp" />
-    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="NonlinearMethodSystem.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="ShaderSetup.cpp" />
-    <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="StanfordSystem.cpp" />
     <ClCompile Include="targa-1.cpp" />
     <ClCompile Include="TetraMeshReader.cpp" />
     <ClCompile Include="ViewManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Cube.h" />
-    <ClInclude Include="Cylinder.h" />
     <ClInclude Include="GeorgiaInstituteSystem.h" />
-    <ClInclude Include="globals.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Macros.h" />
-    <ClInclude Include="Mesh.h" />
     <ClInclude Include="NonlinearMethodSystem.h" />
-    <ClInclude Include="Sphere.h" />
     <ClInclude Include="StanfordSystem.h" />
     <ClInclude Include="TetraMeshReader.h" />
     <ClInclude Include="Vertex.h" />
