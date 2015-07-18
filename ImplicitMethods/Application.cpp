@@ -114,16 +114,7 @@ void render()
 	glm::mat4 projMatrix = glm::perspective(45.0f, (float)ar, 0.001f, 100.0f); //Projection Matrix
 	double cameraHeight = 0.5;  //Max height of camera if looking straight down at character
 	
-	//mat4 modelingMatrix = mat4(1.0f); //Identity matrix
-	//mat4 modelViewMatrix = viewingMatrix * modelingMatrix;
-
 	glm::mat4 modelViewMatrix = viewManager.doTransform();
-
-	//particleSystem -> doRender(timeElapsed * 4);
-	
-	//const float SCALEFACTOR = 0.05f;
-	//mat4 tetraMatrix = scale(modelViewMatrix, vec3(SCALEFACTOR, SCALEFACTOR, SCALEFACTOR));
-
 
 	particleSystem -> doRender(timeElapsed * 4, projMatrix, modelViewMatrix);
 

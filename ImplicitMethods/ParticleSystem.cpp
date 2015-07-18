@@ -971,9 +971,11 @@ void ParticleSystem::setEyePos(glm::vec3 & eyePos)
 
 void ParticleSystem::initVBOs()
 {
+	//Tetrahedral mesh
 	glGenBuffers(1, vboHandle);
 	glGenBuffers(1, indexVboHandle);
 
+	//Floor
 	glGenBuffers(1, floorVboHandle);
 	glGenBuffers(1, floorIndexVboHandle);
 }
@@ -1026,24 +1028,7 @@ void ParticleSystem::sendVBOs()
 	floorVertices.push_back(vertex2);
 	floorVertices.push_back(vertex3);
 
-	//glBegin(GL_QUADS);
-		//glNormal3f(0.0f, 1.0f, 0.0f);
-		//glVertex3f(-10.0f, -4.0f, -10.0f);
-		//glNormal3f(0.0f, 1.0f, 0.0f);
-		//glVertex3f(10.0f, -4.0f, -10.0f);
-		//glNormal3f(0.0f, 1.0f, 0.0f);
-		//glVertex3f(10.0f, -4.0f, 10.0f);
-		//glNormal3f(0.0f, 1.0f, 0.0f);
-		//glVertex3f(-10.0f, -4.0f, 10.0f);
-	//glEnd();
-
-	//Data structure:
-	//float position [DIMENSION + 1];	//Position vector in 3d space
-	//float vertexNormal [DIMENSION + 1];		//Normal vector in 3d space (this one is a VERTEX AVERAGE used in lighting)
-	//float color[4];
-	//float velocity [DIMENSION + 1];	//Velocity vector in 3d space	
-	//int triangleCount;				//Number of triangles in which the vertex for this particle is contained (helps calculate normals)
-	
+		
 	floorIndices.clear();
 	//Two triangles for a quad
 	floorIndices.push_back(0);
@@ -1072,6 +1057,7 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 	glm::mat4 normalMatrix = glm::inverse(modelViewMatrix);
 	normalMatrix = glm::transpose(normalMatrix);
 
+	//Tetrahedral mesh rendering
 	glUseProgram(programObject);
 
 	//Parameter setup
@@ -1133,37 +1119,29 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (char *) NULL + 0);
 
 	glUseProgram(0);
-
-
-	////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////
-	{
-
-	glm::mat4 totalMatrix = projMatrix * modelViewMatrix;
-	glm::mat4 normalMatrix = glm::inverse(modelViewMatrix);
-	normalMatrix = glm::transpose(normalMatrix);
-
+	
+	//Floor rendering
 	glUseProgram(programObject);
 
 	//Parameter setup
-	GLuint c0 = glGetAttribLocation(programObject, "position");
-	GLuint c1 = glGetAttribLocation(programObject, "normal");
-	GLuint c2 = glGetAttribLocation(programObject, "color1");
+	c0 = glGetAttribLocation(programObject, "position");
+	c1 = glGetAttribLocation(programObject, "normal");
+	c2 = glGetAttribLocation(programObject, "color1");
 
-	GLuint l1 = glGetUniformLocation(programObject, "lightAmbient");
-	GLuint l2 = glGetUniformLocation(programObject, "lightDiffuse");
-	GLuint l3 = glGetUniformLocation(programObject, "lightSpecular");
-	GLuint lp = glGetUniformLocation(programObject, "lightPosition");
-	GLuint ep = glGetUniformLocation(programObject, "eyePosition");
+	l1 = glGetUniformLocation(programObject, "lightAmbient");
+	l2 = glGetUniformLocation(programObject, "lightDiffuse");
+	l3 = glGetUniformLocation(programObject, "lightSpecular");
+	lp = glGetUniformLocation(programObject, "lightPosition");
+	ep = glGetUniformLocation(programObject, "eyePosition");
 
-	GLuint d1 = glGetUniformLocation(programObject, "ambient_coef");
-	GLuint d2 = glGetUniformLocation(programObject, "diffuse_coef");
-	GLuint d3 = glGetUniformLocation(programObject, "specular_coef");
-	GLuint d4 = glGetUniformLocation(programObject, "mat_shininess");
+	d1 = glGetUniformLocation(programObject, "ambient_coef");
+	d2 = glGetUniformLocation(programObject, "diffuse_coef");
+	d3 = glGetUniformLocation(programObject, "specular_coef");
+	d4 = glGetUniformLocation(programObject, "mat_shininess");
 
-	GLuint m1 = glGetUniformLocation(programObject, "local2clip");
-	GLuint m2 = glGetUniformLocation(programObject, "local2eye");
-	GLuint m3 = glGetUniformLocation(programObject, "normalMatrix");
+	m1 = glGetUniformLocation(programObject, "local2clip");
+	m2 = glGetUniformLocation(programObject, "local2eye");
+	m3 = glGetUniformLocation(programObject, "normalMatrix");
 
 	glEnableVertexAttribArray(c0); 
 	glEnableVertexAttribArray(c1);
@@ -1204,13 +1182,7 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 	glDrawElements(GL_TRIANGLES, floorIndices.size(), GL_UNSIGNED_INT, (char *) NULL + 0);
 
 	glUseProgram(0);
-	
-
-	}
-
-	
-
-	
+		
 }
 
 
