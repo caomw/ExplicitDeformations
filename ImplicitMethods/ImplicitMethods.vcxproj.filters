@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Particle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -49,6 +46,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TetraMeshReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderSetup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -128,6 +131,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="chrisSimpler.node">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="maze.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="maze.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

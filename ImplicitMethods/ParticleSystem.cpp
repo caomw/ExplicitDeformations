@@ -1,4 +1,5 @@
-#include "ParticleSystem.h"
+#include <gl/glew.h>
+
 #include <gl/glut.h>
 #include <gl/GLU.h>
 #include <cmath>
@@ -8,8 +9,11 @@
 #include "targa.h"
 #include "Macros.h"
 
-using namespace std;
+#include "ParticleSystem.h"
 
+
+
+using namespace std;
 
 ////////////////////////////////////////
 //Main ParticleSystem class implementation
@@ -99,7 +103,7 @@ ParticleSystem::ParticleSystem(Vertex * vertexList, int vertexCount, int * tetra
 
 	normals = new double[DIMENSION * numTetra * 4];
 
-	vertexNormals = new double [DIMENSION * numVertices];
+	//vertexNormals = new double [(DIMENSION + 1) * numVertices];
 	tetraCounts = new int [numVertices];
 
 	massMatrix = new double [numVertices];
@@ -130,7 +134,7 @@ ParticleSystem::ParticleSystem(Vertex * vertexList, int vertexCount, int * tetra
 	//Set values for boolean variables
 	showInfoText = true;
 	
-	isAnimating = true;
+	isAnimating = false;
 	renderMode = 1;
 	renderToImage = false;
 	frameNumber = 1;
@@ -157,8 +161,64 @@ ParticleSystem::ParticleSystem(Vertex * vertexList, int vertexCount, int * tetra
 	}
 	#endif
 
-	
+	////////////////////////////LIGHTING////////////////////////////////////////////////
+	//If lighting is calculated in eye space, the eye position basically is the origin - use this for the default
+	eyePos[0] = 0.0f;
+	eyePos[1] = 0.0f;
+	eyePos[2] = -5.0f;
 
+	lightAmbient[0] = 0.05; //Some ambient but not much at all
+	lightAmbient[1] = 0.05;
+	lightAmbient[2] = 0.05;
+	
+	lightFullAmbient[0] = 0.9; //Lots of ambient - useful for debugging in wireframe mode
+	lightFullAmbient[1] = 0.9;
+	lightFullAmbient[2] = 0.9;
+	lightFullAmbient[3] = 1;
+
+	lightDiffuse[0] = 0.8;
+	lightDiffuse[1] = 0.8;
+	lightDiffuse[2] = 0.8;
+	
+	lightDiffuse[3] = 1;
+
+	//Turning off specular for now unless it's needed (and verified as good looking)
+	//lightSpecular[0] = 1;
+	//lightSpecular[1] = 1;
+	//lightSpecular[2] = 1;
+	lightSpecular[0] = 0;
+	lightSpecular[1] = 0;
+	lightSpecular[2] = 0;
+	lightSpecular[3] = 1;
+
+	lightPosition[0] = 0;
+	lightPosition[1] = 0;
+	lightPosition[2] = 1;
+	lightPosition[3] = 1;
+
+	matAmbient[0] = 1.0;
+	matAmbient[1] = 1.0;
+	matAmbient[2] = 1.0;
+	matAmbient[3] = 1;
+
+	matDiffuse[0] = 1;
+	matDiffuse[1] = 1;
+	matDiffuse[2] = 1;
+	matDiffuse[3] = 1;
+
+	matSpecular[0] = 0.9;
+	matSpecular[1] = 0.9;
+	matSpecular[2] = 0.9;
+	matSpecular[3] = 1;
+
+	lightColor[0] = 1.0f;
+	lightColor[1] = 0.1f;
+	lightColor[2] = 0.1f;
+	lightColor[3] = 1.0f;
+
+	matShininess[0] = 10000;
+	
+	ambientMode = false;
 }
 
 //Destructor - free all memory for dynamically allocated arrays
@@ -390,6 +450,7 @@ void ParticleSystem::calculateNormals()
 		for (int j = 0; j < DIMENSION; j++)
 		{
 			normals[numVertices * j + i] = 0;
+			defVertices[i].vertexNormal[j] = 0;
 		}
 		tetraCounts[i] = 0;
 	}
@@ -407,9 +468,12 @@ void ParticleSystem::calculateNormals()
 
 		for (int i = 0; i < DIMENSION; i++)
 		{
-			vertexNormals[i * numVertices + tetraList[3 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[1 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[0 * numTetra + currentTetrad]] += crossProductResult[i];
+			defVertices[tetraList[3 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[1 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[0 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[3 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[1 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[0 * numTetra + currentTetrad]] += crossProductResult[i];
 		}
 		tetraCounts[tetraList[3 * numTetra + currentTetrad]]++;
 		tetraCounts[tetraList[1 * numTetra + currentTetrad]]++;
@@ -430,9 +494,12 @@ void ParticleSystem::calculateNormals()
 
 		for (int i = 0; i < DIMENSION; i++)
 		{
-			vertexNormals[i * numVertices + tetraList[2 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[1 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[3 * numTetra + currentTetrad]] += crossProductResult[i];
+			defVertices[tetraList[2 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[1 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[3 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[2 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[1 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[3 * numTetra + currentTetrad]] += crossProductResult[i];
 		}
 		tetraCounts[tetraList[2 * numTetra + currentTetrad]]++;
 		tetraCounts[tetraList[1 * numTetra + currentTetrad]]++;
@@ -452,9 +519,12 @@ void ParticleSystem::calculateNormals()
 
 		for (int i = 0; i < DIMENSION; i++)
 		{
-			vertexNormals[i * numVertices + tetraList[2 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[3 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[0 * numTetra + currentTetrad]] += crossProductResult[i];
+			defVertices[tetraList[2 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[3 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[0 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[2 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[3 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[0 * numTetra + currentTetrad]] += crossProductResult[i];
 		}
 		tetraCounts[tetraList[2 * numTetra + currentTetrad]]++;
 		tetraCounts[tetraList[3 * numTetra + currentTetrad]]++;
@@ -474,9 +544,12 @@ void ParticleSystem::calculateNormals()
 
 		for (int i = 0; i < DIMENSION; i++)
 		{
-			vertexNormals[i * numVertices + tetraList[0 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[1 * numTetra + currentTetrad]] += crossProductResult[i];
-			vertexNormals[i * numVertices + tetraList[2 * numTetra + currentTetrad]] += crossProductResult[i];
+			defVertices[tetraList[0 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[1 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			defVertices[tetraList[2 * numTetra + currentTetrad]].vertexNormal[i] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[0 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[1 * numTetra + currentTetrad]] += crossProductResult[i];
+			//vertexNormals[i * numVertices + tetraList[2 * numTetra + currentTetrad]] += crossProductResult[i];
 		}
 		tetraCounts[tetraList[0 * numTetra + currentTetrad]]++;
 		tetraCounts[tetraList[1 * numTetra + currentTetrad]]++;
@@ -494,15 +567,18 @@ void ParticleSystem::calculateNormals()
 		double magnitude = 0;
 		for (int j = 0; j < DIMENSION; j++)
 		{
-			vertexNormals[j * numVertices + i] /= tetraCounts[i];  //Find average direction of all normals for adjacent triangles
-			magnitude += vertexNormals[j * numVertices + i] * vertexNormals[j * numVertices + i];
+			defVertices[i].vertexNormal[j] /= tetraCounts[i];
+			//vertexNormals[j * numVertices + i] /= tetraCounts[i];  //Find average direction of all normals for adjacent triangles
+			magnitude += defVertices[i].vertexNormal[j] * defVertices[i].vertexNormal[j];
+			//magnitude += vertexNormals[j * numVertices + i] * vertexNormals[j * numVertices + i];
 		}
 
 		magnitude = sqrt(magnitude);
 
 		for (int j = 0; j < DIMENSION; j++)
 		{
-			vertexNormals[j * numVertices + i] /= magnitude;  //Normalize the normal to be unit length
+			defVertices[i].vertexNormal[j] /= magnitude;
+			//vertexNormals[j * numVertices + i] /= magnitude;  //Normalize the normal to be unit length
 		}
 		
 	}
@@ -668,37 +744,68 @@ void ParticleSystem::doRender(double videoWriteDeltaT)
 
 		glColor3f(myTetraColor, 1.0, 0.0f);
 		glBegin(GL_TRIANGLES);
+		
+		
+		int normalVertex = 0;
 		//Counter clockwise winding
 		//Triangle 1
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
+
+		normalVertex = tetraList[3 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[3 * numTetra + i]].position[0], defVertices[tetraList[3 * numTetra + i]].position[1], defVertices[tetraList[3 * numTetra + i]].position[2]);  //vertex 3
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
+		normalVertex = tetraList[1 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[1 * numTetra + i]].position[0], defVertices[tetraList[1 * numTetra + i]].position[1], defVertices[tetraList[1 * numTetra + i]].position[2]);  //vertex 1
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
+		normalVertex = tetraList[0 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[0 * numTetra + i]].position[0], defVertices[tetraList[0 * numTetra + i]].position[1], defVertices[tetraList[0 * numTetra + i]].position[2]);  //vertex 0
 		
+
 		glColor3f(myTetraColor, 0.8f, 0.0f);
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
+		normalVertex = tetraList[2 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[2 * numTetra + i]].position[0], defVertices[tetraList[2 * numTetra + i]].position[1], defVertices[tetraList[2 * numTetra + i]].position[2]);  //vertex 2
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
+		normalVertex = tetraList[1 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[1 * numTetra + i]].position[0], defVertices[tetraList[1 * numTetra + i]].position[1], defVertices[tetraList[1 * numTetra + i]].position[2]);  //vertex 1
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
+		normalVertex = tetraList[3 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[3 * numTetra + i]].position[0], defVertices[tetraList[3 * numTetra + i]].position[1], defVertices[tetraList[3 * numTetra + i]].position[2]);  //vertex 3
+
 
 		glColor3f(myTetraColor, 0.6f, 0.0f);
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
+		normalVertex = tetraList[2 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[2 * numTetra + i]].position[0], defVertices[tetraList[2 * numTetra + i]].position[1], defVertices[tetraList[2 * numTetra + i]].position[2]);  //vertex 2
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
+		normalVertex = tetraList[3 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[3 * numTetra + i]].position[0], defVertices[tetraList[3 * numTetra + i]].position[1], defVertices[tetraList[3 * numTetra + i]].position[2]);  //vertex 3
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
+		normalVertex = tetraList[0 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[0 * numTetra + i]].position[0], defVertices[tetraList[0 * numTetra + i]].position[1], defVertices[tetraList[0 * numTetra + i]].position[2]);  //vertex 0
 
+
 		glColor3f(myTetraColor, 0.4f, 0.0f);
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
+		normalVertex = tetraList[0 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[0 * numTetra + i]].position[0], defVertices[tetraList[0 * numTetra + i]].position[1], defVertices[tetraList[0 * numTetra + i]].position[2]);  //vertex 0
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
+		normalVertex = tetraList[1 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[1 * numTetra + i]].position[0], defVertices[tetraList[1 * numTetra + i]].position[1], defVertices[tetraList[1 * numTetra + i]].position[2]);  //vertex 1
-		glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
+		normalVertex = tetraList[2 * numTetra + i];
+		glNormal3f(defVertices[normalVertex].vertexNormal[0], defVertices[normalVertex].vertexNormal[1], defVertices[normalVertex].vertexNormal[2]);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
 		glVertex3f(defVertices[tetraList[2 * numTetra + i]].position[0], defVertices[tetraList[2 * numTetra + i]].position[1], defVertices[tetraList[2 * numTetra + i]].position[2]);  //vertex 2
 
 		glEnd();
@@ -851,10 +958,231 @@ void ParticleSystem::doRender(double videoWriteDeltaT)
 		
 	}
 		
-	
+}
 
-	
+//This method stores the current eye position (from the camera) for this mesh
+//parameter eyePos - the eye position to store
+void ParticleSystem::setEyePos(glm::vec3 & eyePos)
+{
+	this -> eyePos[0] = eyePos[0];
+	this -> eyePos[1] = eyePos[1];
+	this -> eyePos[2] = eyePos[2];
+}
 
+void ParticleSystem::initVBOs()
+{
+	//Tetrahedral mesh
+	glGenBuffers(1, vboHandle);
+	glGenBuffers(1, indexVboHandle);
+
+	//Floor
+	glGenBuffers(1, floorVboHandle);
+	glGenBuffers(1, floorIndexVboHandle);
+}
+
+void ParticleSystem::sendVBOs()
+{
+	//Tetrahedral Mesh
+	glBindBuffer(GL_ARRAY_BUFFER, vboHandle[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * numVertices, defVertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	//glColor3f(myTetraColor, 1.0, 0.0f);
+	indices.clear();
+	for (int i = 0; i < numTetra; i++)
+	{
+		//Counter clockwise winding
+		//Triangle 1
+		indices.push_back(tetraList[3 * numTetra + i]);
+		indices.push_back(tetraList[1 * numTetra + i]);
+		indices.push_back(tetraList[0 * numTetra + i]);
+		
+		indices.push_back(tetraList[2 * numTetra + i]);
+		indices.push_back(tetraList[1 * numTetra + i]);
+		indices.push_back(tetraList[3 * numTetra + i]);
+
+		indices.push_back(tetraList[2 * numTetra + i]);
+		indices.push_back(tetraList[3 * numTetra + i]);
+		indices.push_back(tetraList[0 * numTetra + i]);
+
+		indices.push_back(tetraList[0 * numTetra + i]);
+		indices.push_back(tetraList[1 * numTetra + i]);
+		indices.push_back(tetraList[2 * numTetra + i]);
+
+	}
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVboHandle[0]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * indices.size(), &indices[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	//Floor
+	floorVertices.clear();
+	//Vertex vertex0 = {-halfWidth, -halfHeight, halfDepth, 1, normal0[0], normal0[1], normal0[2], 0, color1[0], color1[1], color1[2], 1.0f}; //Front lower left
+	Vertex vertex0 = Vertex(-10.0f, -4.0f, -10.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+	Vertex vertex1 = Vertex(10.0f, -4.0f, -10.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+	Vertex vertex2 = Vertex(10.0f, -4.0f, 10.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+	Vertex vertex3 = Vertex(-10.0f, -4.0f, 10.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+
+	floorVertices.push_back(vertex0);
+	floorVertices.push_back(vertex1);
+	floorVertices.push_back(vertex2);
+	floorVertices.push_back(vertex3);
+
+		
+	floorIndices.clear();
+	//Two triangles for a quad
+	floorIndices.push_back(0);
+	floorIndices.push_back(1);
+	floorIndices.push_back(2);
+	floorIndices.push_back(2);
+	floorIndices.push_back(3);
+	floorIndices.push_back(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, floorVboHandle[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * floorVertices.size(), &floorVertices[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floorIndexVboHandle[0]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * floorIndices.size(), &floorIndices[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+}
+
+void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & modelViewMatrix)
+{
+	sendVBOs();
+
+	glm::mat4 totalMatrix = projMatrix * modelViewMatrix;
+	glm::mat4 normalMatrix = glm::inverse(modelViewMatrix);
+	normalMatrix = glm::transpose(normalMatrix);
+
+	//Tetrahedral mesh rendering
+	glUseProgram(programObject);
+
+	//Parameter setup
+	GLuint c0 = glGetAttribLocation(programObject, "position");
+	GLuint c1 = glGetAttribLocation(programObject, "normal");
+	GLuint c2 = glGetAttribLocation(programObject, "color1");
+
+	GLuint l1 = glGetUniformLocation(programObject, "lightAmbient");
+	GLuint l2 = glGetUniformLocation(programObject, "lightDiffuse");
+	GLuint l3 = glGetUniformLocation(programObject, "lightSpecular");
+	GLuint lp = glGetUniformLocation(programObject, "lightPosition");
+	GLuint ep = glGetUniformLocation(programObject, "eyePosition");
+
+	GLuint d1 = glGetUniformLocation(programObject, "ambient_coef");
+	GLuint d2 = glGetUniformLocation(programObject, "diffuse_coef");
+	GLuint d3 = glGetUniformLocation(programObject, "specular_coef");
+	GLuint d4 = glGetUniformLocation(programObject, "mat_shininess");
+
+	GLuint m1 = glGetUniformLocation(programObject, "local2clip");
+	GLuint m2 = glGetUniformLocation(programObject, "local2eye");
+	GLuint m3 = glGetUniformLocation(programObject, "normalMatrix");
+
+	glEnableVertexAttribArray(c0); 
+	glEnableVertexAttribArray(c1);
+    glEnableVertexAttribArray(c2); 
+
+	glBindBuffer(GL_ARRAY_BUFFER, vboHandle[0]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVboHandle[0]);
+
+	glVertexAttribPointer(c0,4,GL_FLOAT, GL_FALSE, sizeof(Vertex),(char*) NULL+0); 
+	glVertexAttribPointer(c1,4,GL_FLOAT, GL_FALSE, sizeof(Vertex),(char*) NULL+16); 
+    glVertexAttribPointer(c2,4,GL_FLOAT, GL_FALSE, sizeof(Vertex),(char*) NULL+32); 
+
+	//If in ambient mode, add extra ambience to make things really bright
+	//Otherwise use normal ambience
+	if (ambientMode)
+	{
+		glUniform4f(l1, lightAmbient[0], lightAmbient[1], lightFullAmbient[2], 1.0);
+	}
+	else
+	{
+		glUniform4f(l1, lightAmbient[0], lightAmbient[1], lightAmbient[2], 1.0);
+	}
+	glUniform4f(l2, lightDiffuse[0], lightDiffuse[1], lightDiffuse[2], 1.0);
+	glUniform4f(l3, lightSpecular[0], lightSpecular[1], lightSpecular[2],1.0);
+	glUniform4f(lp, lightPosition[0], lightPosition[1], lightPosition[2], lightPosition[3]);
+	glUniform4f(ep, eyePos[0], eyePos[1], eyePos[2], 1); 
+
+	glUniform4f(d1, matAmbient[0], matAmbient[1], matAmbient[2], 1.0);
+	glUniform4f(d2, matDiffuse[0], matDiffuse[1], matDiffuse[2], 1.0);
+	glUniform4f(d3, matSpecular[0], matSpecular[1], matSpecular[2],1.0);
+	glUniform1f(d4, matShininess[0]);
+
+	glUniformMatrix4fv(m1, 1, GL_FALSE, &totalMatrix[0][0]);
+	glUniformMatrix4fv(m2, 1, GL_FALSE, &modelViewMatrix[0][0]);
+	glUniformMatrix4fv(m3, 1, GL_FALSE, &normalMatrix[0][0]);
+
+	//Draw
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (char *) NULL + 0);
+
+	glUseProgram(0);
+	
+	//Floor rendering
+	glUseProgram(programObject);
+
+	//Parameter setup
+	c0 = glGetAttribLocation(programObject, "position");
+	c1 = glGetAttribLocation(programObject, "normal");
+	c2 = glGetAttribLocation(programObject, "color1");
+
+	l1 = glGetUniformLocation(programObject, "lightAmbient");
+	l2 = glGetUniformLocation(programObject, "lightDiffuse");
+	l3 = glGetUniformLocation(programObject, "lightSpecular");
+	lp = glGetUniformLocation(programObject, "lightPosition");
+	ep = glGetUniformLocation(programObject, "eyePosition");
+
+	d1 = glGetUniformLocation(programObject, "ambient_coef");
+	d2 = glGetUniformLocation(programObject, "diffuse_coef");
+	d3 = glGetUniformLocation(programObject, "specular_coef");
+	d4 = glGetUniformLocation(programObject, "mat_shininess");
+
+	m1 = glGetUniformLocation(programObject, "local2clip");
+	m2 = glGetUniformLocation(programObject, "local2eye");
+	m3 = glGetUniformLocation(programObject, "normalMatrix");
+
+	glEnableVertexAttribArray(c0); 
+	glEnableVertexAttribArray(c1);
+    glEnableVertexAttribArray(c2); 
+
+	glBindBuffer(GL_ARRAY_BUFFER, floorVboHandle[0]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floorIndexVboHandle[0]);
+
+	glVertexAttribPointer(c0,4,GL_FLOAT, GL_FALSE, sizeof(Vertex),(char*) NULL+0); 
+	glVertexAttribPointer(c1,4,GL_FLOAT, GL_FALSE, sizeof(Vertex),(char*) NULL+16); 
+    glVertexAttribPointer(c2,4,GL_FLOAT, GL_FALSE, sizeof(Vertex),(char*) NULL+32); 
+
+	//If in ambient mode, add extra ambience to make things really bright
+	//Otherwise use normal ambience
+	if (ambientMode)
+	{
+		glUniform4f(l1, lightAmbient[0], lightAmbient[1], lightFullAmbient[2], 1.0);
+	}
+	else
+	{
+		glUniform4f(l1, 0.125, 0.125, 0.125, 1.0);
+	}
+	glUniform4f(l2, lightDiffuse[0], lightDiffuse[1], lightDiffuse[2], 1.0);
+	glUniform4f(l3, lightSpecular[0], lightSpecular[1], lightSpecular[2],1.0);
+	glUniform4f(lp, lightPosition[0], lightPosition[1], lightPosition[2], lightPosition[3]);
+	glUniform4f(ep, eyePos[0], eyePos[1], eyePos[2], 1); 
+
+	glUniform4f(d1, matAmbient[0], matAmbient[1], matAmbient[2], 1.0);
+	glUniform4f(d2, matDiffuse[0], matDiffuse[1], matDiffuse[2], 1.0);
+	glUniform4f(d3, matSpecular[0], matSpecular[1], matSpecular[2],1.0);
+	glUniform1f(d4, matShininess[0]);
+
+	glUniformMatrix4fv(m1, 1, GL_FALSE, &totalMatrix[0][0]);
+	glUniformMatrix4fv(m2, 1, GL_FALSE, &modelViewMatrix[0][0]);
+	glUniformMatrix4fv(m3, 1, GL_FALSE, &normalMatrix[0][0]);
+
+	//Draw
+	glDrawElements(GL_TRIANGLES, floorIndices.size(), GL_UNSIGNED_INT, (char *) NULL + 0);
+
+	glUseProgram(0);
+		
 }
 
 
