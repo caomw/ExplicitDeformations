@@ -56,7 +56,10 @@ class ParticleSystem
 	Vertex * orgVertices;				//Original set of vertices (undeformed)
 	Vertex * defVertices;				//Deformed set of vertices
 	int numVertices;					//Number of particles in the system
-	vector<int> indices;				//Mesh indices
+	vector<int> indices;				//Tetrahedral mesh indices
+
+	vector<Vertex> floorVertices;		//Flor mesh vertices
+	vector<int> floorIndices;			//Floor mesh indices
 	
 	double * normals;					//Array holding all face normals (if used)
 	//double * vertexNormals;				//Normals for LIGHTING
@@ -111,6 +114,9 @@ protected:
 
 	GLuint vboHandle[1];	  //handle to vertex buffer object for vertices
 	GLuint indexVboHandle[1]; //handle to vertex buffer object for indices
+	GLuint floorVboHandle[1];	  //handle to vertex buffer object for vertices
+	GLuint floorIndexVboHandle[1]; //handle to vertex buffer object for indices
+
 
 	GLuint programObject;				//Program object needed for shaders (notably lighting)
 	GLfloat eyePos[3];		  //Position of the eye (for the camera)
