@@ -126,6 +126,8 @@
     <None Include="house2.node" />
     <None Include="maze.frag" />
     <None Include="maze.vert" />
+    <None Include="P.ele" />
+    <None Include="P.node" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

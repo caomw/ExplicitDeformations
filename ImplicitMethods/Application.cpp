@@ -207,8 +207,9 @@ int main(int argCount, char **argValue)
 	int * tetraList = NULL;
 	TetraMeshReader theReader;
 	//if (theReader.openFile("hack.node", "hack.ele"))
-	if (theReader.openFile("house2.node", "house2.ele"))
+	//if (theReader.openFile("house2.node", "house2.ele"))
 	//if (theReader.openFile("dragon.node", "dragon.ele"))
+	if (theReader.openFile("P.node", "P.ele"))
 	// (theReader.openFile("chris.node", "chris.ele"))
 	//if (theReader.openFile("chris2.node", "chris2.ele"))
 	//if (theReader.openFile("chris4.node", "chris4.ele"))

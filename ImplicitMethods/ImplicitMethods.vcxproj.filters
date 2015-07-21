@@ -139,5 +139,11 @@
     <None Include="maze.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="P.ele">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="P.node">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
