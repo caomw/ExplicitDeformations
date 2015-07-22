@@ -64,7 +64,7 @@ ViewManager viewManager;			//Instance of the view manager to allow user view con
 Keyboard * keyboard;				//Instance of the Keyboard class to process key presses
 Logger * logger;					//Instance of Logger class to perform all logging
 const int whichMethod = 1;			//1 for stanford method.  2 for georgia Institute Method.  3 for NonLinear Paper method.
-const int whichModel = 3;
+const int whichModel = 2;
 
 double ar = 0;
 
@@ -149,6 +149,11 @@ void render()
 	
 	glm::mat4 floorModelViewMatrix = viewManager.doTransform();
 	glm::mat4 tetraModelViewMatrix = floorModelViewMatrix;
+
+	if (whichModel == 2)
+	{
+		tetraModelViewMatrix= glm::translate(tetraModelViewMatrix, glm::vec3(-10.0f, 0, 7.0f));
+	}
 
 	if (whichModel == 3)
 	{
