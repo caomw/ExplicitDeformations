@@ -64,7 +64,7 @@ ViewManager viewManager;			//Instance of the view manager to allow user view con
 Keyboard * keyboard;				//Instance of the Keyboard class to process key presses
 Logger * logger;					//Instance of Logger class to perform all logging
 const int whichMethod = 1;			//1 for stanford method.  2 for georgia Institute Method.  3 for NonLinear Paper method.
-const int whichModel = 1;
+const int whichModel = 3;
 
 double ar = 0;
 
@@ -147,9 +147,17 @@ void render()
 	glm::mat4 projMatrix = glm::perspective(45.0f, (float)ar, 0.1f, 100.0f); //Projection Matrix
 	double cameraHeight = 0.5;  //Max height of camera if looking straight down at character
 	
-	glm::mat4 modelViewMatrix = viewManager.doTransform();
+	glm::mat4 floorModelViewMatrix = viewManager.doTransform();
+	glm::mat4 tetraModelViewMatrix = floorModelViewMatrix;
 
-	particleSystem -> doRender(timeElapsed * 4, projMatrix, modelViewMatrix);
+	if (whichModel == 3)
+	{
+		tetraModelViewMatrix= glm::scale(tetraModelViewMatrix, glm::vec3(0.25, 0.25, 0.25));
+		tetraModelViewMatrix= glm::translate(tetraModelViewMatrix, glm::vec3(-45.0f, -12, 30.0f));
+
+	}
+
+	particleSystem -> doRender(timeElapsed * 4, projMatrix, floorModelViewMatrix, tetraModelViewMatrix);
 
 	glFlush();
 

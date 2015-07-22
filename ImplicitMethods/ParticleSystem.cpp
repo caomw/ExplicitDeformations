@@ -1055,12 +1055,12 @@ void ParticleSystem::sendVBOs()
 
 }
 
-void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & modelViewMatrix)
+void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix)
 {
 	sendVBOs();
 
-	glm::mat4 totalMatrix = projMatrix * modelViewMatrix;
-	glm::mat4 normalMatrix = glm::inverse(modelViewMatrix);
+	glm::mat4 totalMatrix = projMatrix * tetraModelViewMatrix;
+	glm::mat4 normalMatrix = glm::inverse(tetraModelViewMatrix);
 	normalMatrix = glm::transpose(normalMatrix);
 
 	//Tetrahedral mesh rendering
@@ -1118,7 +1118,7 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 	glUniform1f(d4, matShininess[0]);
 
 	glUniformMatrix4fv(m1, 1, GL_FALSE, &totalMatrix[0][0]);
-	glUniformMatrix4fv(m2, 1, GL_FALSE, &modelViewMatrix[0][0]);
+	glUniformMatrix4fv(m2, 1, GL_FALSE, &tetraModelViewMatrix[0][0]);
 	glUniformMatrix4fv(m3, 1, GL_FALSE, &normalMatrix[0][0]);
 
 	//Draw
@@ -1126,7 +1126,14 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 
 	glUseProgram(0);
 	
+	////////////////////////////////////////////////////////////////////////////////////
 	//Floor rendering
+
+	totalMatrix = projMatrix * floorModelViewMatrix;
+	normalMatrix = glm::inverse(floorModelViewMatrix);
+	normalMatrix = glm::transpose(normalMatrix);
+
+
 	glUseProgram(programObject);
 
 	//Parameter setup
@@ -1181,7 +1188,7 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 	glUniform1f(d4, matShininess[0]);
 
 	glUniformMatrix4fv(m1, 1, GL_FALSE, &totalMatrix[0][0]);
-	glUniformMatrix4fv(m2, 1, GL_FALSE, &modelViewMatrix[0][0]);
+	glUniformMatrix4fv(m2, 1, GL_FALSE, &floorModelViewMatrix[0][0]);
 	glUniformMatrix4fv(m3, 1, GL_FALSE, &normalMatrix[0][0]);
 
 	//Draw

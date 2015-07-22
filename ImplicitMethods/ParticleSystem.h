@@ -31,7 +31,7 @@ class ParticleSystem
 	void doCollisionDetectionAndResponse(double deltaT);
 	void calculateNormals();
 	void doRender(double videoWriteDeltaT);
-	void doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & modelViewMatrix);
+	void doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix);
 	//UI Methods
 	void increaseEarthGravity(double amount);
 	void increaseStraightRestLength(double amount);
