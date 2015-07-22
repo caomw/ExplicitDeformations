@@ -111,7 +111,7 @@ void render()
 	//Render Logic
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glm::mat4 projMatrix = glm::perspective(45.0f, (float)ar, 0.001f, 100.0f); //Projection Matrix
+	glm::mat4 projMatrix = glm::perspective(45.0f, (float)ar, 0.1f, 100.0f); //Projection Matrix
 	double cameraHeight = 0.5;  //Max height of camera if looking straight down at character
 	
 	glm::mat4 modelViewMatrix = viewManager.doTransform();
