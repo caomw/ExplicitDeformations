@@ -36,6 +36,7 @@ class ParticleSystem
 	void increaseEarthGravity(double amount);
 	void increaseStraightRestLength(double amount);
 	void toggleInfoText();
+	void toggleFullAmbient();
 	void setWindowDimensions(int width, int height);
 	void toggleAnimation();
 	void toggleRenderMode();

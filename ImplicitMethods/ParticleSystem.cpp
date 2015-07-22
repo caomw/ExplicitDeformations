@@ -1095,7 +1095,7 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 	//Otherwise use normal ambience
 	if (ambientMode)
 	{
-		glUniform4f(l1, lightAmbient[0], lightAmbient[1], lightFullAmbient[2], 1.0);
+		glUniform4f(l1, lightFullAmbient[0], lightFullAmbient[1], lightFullAmbient[2], 1.0);
 	}
 	else
 	{
@@ -1267,6 +1267,11 @@ void ParticleSystem::increaseStraightRestLength(double amount)
 void ParticleSystem::toggleInfoText()
 {
 	showInfoText = !showInfoText;
+}
+
+void ParticleSystem::toggleFullAmbient()
+{
+	ambientMode = !ambientMode;
 }
 
 //Method to set the window width and height
