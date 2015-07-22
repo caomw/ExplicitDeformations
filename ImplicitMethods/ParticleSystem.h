@@ -46,6 +46,7 @@ class ParticleSystem
 	void loadSpecialState();
 	void setProgramObject(GLuint programObject) {this->programObject = programObject;}
 	void setEyePos(glm::vec3 & eyePos);
+	void setConstants(int K, int mu);
 
 	protected:
 	double halfWidth;					//Half the width of the original grid.  Used to make the grid initially be centered.

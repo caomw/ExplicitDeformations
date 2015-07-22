@@ -134,7 +134,7 @@ ParticleSystem::ParticleSystem(Vertex * vertexList, int vertexCount, int * tetra
 	//Set values for boolean variables
 	showInfoText = true;
 	
-	isAnimating = false;
+	isAnimating = true;
 	renderMode = 1;
 	renderToImage = false;
 	frameNumber = 1;
@@ -967,6 +967,12 @@ void ParticleSystem::setEyePos(glm::vec3 & eyePos)
 	this -> eyePos[0] = eyePos[0];
 	this -> eyePos[1] = eyePos[1];
 	this -> eyePos[2] = eyePos[2];
+}
+
+void ParticleSystem::setConstants(int K, int mu)
+{
+	this->mu = mu;
+	this->lambda = K - (2.0/3) * mu;		//Lame's first parameter
 }
 
 void ParticleSystem::initVBOs()
