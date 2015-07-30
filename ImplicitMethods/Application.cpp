@@ -68,18 +68,17 @@ const int whichModel = 2;
 
 double ar = 0;
 
+int summedTime = 0;
+int frameCount = 0;
+const int FRAME_COUNT_LIMIT = 500;
+
 //This function is called for rendering by GLUT
 void render()
 {
 	//Timing mechanism for performance evaluation
-	#ifdef DEBUGGING
 	int startTime, endTime;
-	if (logger -> isLogging)
-	{
-		startTime = glutGet(GLUT_ELAPSED_TIME);
-	}
-	#endif
-
+	startTime = glutGet(GLUT_ELAPSED_TIME);
+	
 	//Update Logic
 	double timeElapsed;
 
@@ -168,18 +167,18 @@ void render()
 
 	glutSwapBuffers();
 
-	#ifdef DEBUGGING
-	if (logger -> isLogging)
-	{
-		//Calculate time this frame took to compute and render
-		endTime = glutGet(GLUT_ELAPSED_TIME);
-		if (logger -> loggingLevel >= logger -> LIGHT)
-		{
-			cout << "Total time for frame was: " << (double)(endTime - startTime) / 1000 << " seconds" << endl;
-		}
-	}
+	endTime = glutGet(GLUT_ELAPSED_TIME);
+	//cout << "Total time for frame was: " << (double)(endTime - startTime) / 1000 << " seconds" << endl;
+	frameCount++;
+	summedTime += (endTime - startTime);
 
-	#endif
+	if (frameCount == FRAME_COUNT_LIMIT) 
+	{
+		double fps = frameCount / (summedTime / double(1000));
+		cout << "Average FPS for " << FRAME_COUNT_LIMIT << " frames is: " << fps << endl;
+		frameCount = 0;
+		summedTime = 0;
+ 	}
 
 }
 

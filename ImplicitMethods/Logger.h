@@ -8,7 +8,7 @@
 
 using namespace std;
 
-#define DEBUGGING 1				//If present, allows debugging/logging logic to be compiled.  If absent, it will be omitted, resulting in faster execution.
+//#define DEBUGGING 1				//If present, allows debugging/logging logic to be compiled.  If absent, it will be omitted, resulting in faster execution.
 
 //This class implements most logging and manages the settings for it
 //Currently it only logs to the console.
