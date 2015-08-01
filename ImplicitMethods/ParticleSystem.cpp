@@ -1195,6 +1195,46 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 	glDrawElements(GL_TRIANGLES, floorIndices.size(), GL_UNSIGNED_INT, (char *) NULL + 0);
 
 	glUseProgram(0);
+
+	if (renderToImage)
+	{
+
+		//if (timeSinceVideoWrite >= videoWriteDeltaT)
+		{
+			timeSinceVideoWrite = 0.0;
+			//Read the rendered image into a buffer
+			glFlush();
+			glReadPixels(0, 0, windowWidth, windowHeight, GL_RGBA, GL_UNSIGNED_BYTE, screenBuffer);
+
+			//Vertically flip the image in memory - it flips two rows from the screen in memory at a time
+			for (int i = 0; i < windowHeight / 2; i++)
+			{
+				if (i != windowHeight - i)
+				{
+					memcpy(screenRowTemp,(uint8_t *)&screenBuffer[i * windowWidth * 4], windowWidth * 4 * sizeof(uint8_t));
+					memcpy((uint8_t *)&screenBuffer[i * windowWidth * 4], (uint8_t *)&screenBuffer[(windowHeight - i) * windowWidth * 4], windowWidth * 4 * sizeof(uint8_t));
+					memcpy((uint8_t *)&screenBuffer[(windowHeight - i) * windowWidth * 4], screenRowTemp, windowWidth * 4 * sizeof(uint8_t));
+				}
+			}
+		
+			//Write a new targa file, with a new number
+			sprintf(imageFileName, "images\\ImplicitMethods%d.tga", frameNumber);
+			tga_result result = tga_write_rgb(imageFileName, screenBuffer, windowWidth, windowHeight, 32);
+			#ifdef DEBUGGING
+			if (logger -> isLogging && logger -> loggingLevel >= logger -> LIGHT)
+			{
+				if (result != TGA_NOERR)
+				{
+					cout << tga_error(result) << " at frame number " << frameNumber << endl;
+				}
+			}
+			#endif
+
+			frameNumber++;
+		}
+
+		
+	}
 		
 }
 

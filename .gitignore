@@ -209,3 +209,6 @@ FakesAssemblies/
 
 #No current need for .txt files
 *.txt
+
+#Images generated for video
+*.tga

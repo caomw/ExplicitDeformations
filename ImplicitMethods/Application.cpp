@@ -64,7 +64,7 @@ ViewManager viewManager;			//Instance of the view manager to allow user view con
 Keyboard * keyboard;				//Instance of the Keyboard class to process key presses
 Logger * logger;					//Instance of Logger class to perform all logging
 const int whichMethod = 1;			//1 for stanford method.  2 for georgia Institute Method.  3 for NonLinear Paper method.
-const int whichModel = 2;
+const int whichModel = 3;
 
 double ar = 0;
 
