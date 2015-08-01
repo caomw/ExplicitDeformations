@@ -1196,6 +1196,31 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 
 	glUseProgram(0);
 
+	//Render onscreen text with informational messages
+	//Note: This now will be written to the video images
+	if (showInfoText)
+	{
+		//Reference: http://programming-technique.blogspot.com/2012/05/font-rendering-in-glut-using-bitmap.html
+		glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		gluOrtho2D(0, windowWidth, 0, windowHeight);
+		
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		glRasterPos2i(20, 20);
+		for (int i = 0; i < strlen(text); i++)
+		{
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
+		}
+		glPopMatrix();
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+	}
+
 	if (renderToImage)
 	{
 

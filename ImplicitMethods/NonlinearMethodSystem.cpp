@@ -11,7 +11,7 @@ const double epsilon = 1e-12;	//Used to check approximate equality to 0
 
 NonlinearMethodSystem::NonlinearMethodSystem(Vertex * vertexList, int vertexCount, int * tetraList, int tetraCount, Logger * logger) : ParticleSystem(vertexList, vertexCount, tetraList, tetraCount, logger)
 {
-	strcpy(text, "Non-Linear-Method-Type System");
+	strcpy(text, "Method 3");
 	double K = 600;					//Bulk Modulus
 	mu = 600;						//Shear modulus (Lame's second parameter)
 	lambda = K - (2.0/3) * mu;		//Lame's first parameter

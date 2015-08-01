@@ -14,7 +14,7 @@ const double epsilon = 1e-12;	//Used to check approximate equality to 0
 
 GeorgiaInstituteSystem::GeorgiaInstituteSystem(Vertex * vertexList, int vertexCount, int * tetraList, int tetraCount, Logger * logger) : ParticleSystem(vertexList, vertexCount, tetraList, tetraCount, logger)
 {
-	strcpy(text, "Georgia-Institute-Type System");
+	strcpy(text, "Method 2");
 	////double K = 100;					//Bulk Modulus
 	////mu = 100;						//Shear modulus (Lame's second parameter)
 	double K = 700;

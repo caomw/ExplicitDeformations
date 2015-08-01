@@ -16,7 +16,7 @@ int iteration = 1;
 
 StanfordSystem::StanfordSystem(Vertex * vertexList, int vertexCount, int * tetraList, int tetraCount, Logger * logger) : ParticleSystem(vertexList, vertexCount, tetraList, tetraCount, logger)
 {
-	strcpy(text, "Stanford-Type System");
+	strcpy(text, "Method 1");
 	double K = 700;
 	mu = 700; // change hack
 	lambda = K - (2.0/3) * mu;		//Lame's first parameter
