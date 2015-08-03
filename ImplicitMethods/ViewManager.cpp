@@ -15,6 +15,8 @@ ViewManager::ViewManager()
 	
 	xAngle = yAngle = 0;
 	zoomLevel = 0;
+	autoRotate = false;
+	rotationSpeed = 500;
 
 }
 
@@ -105,4 +107,15 @@ glm::mat4 ViewManager::doTransform()
 	glm::mat4 modelViewMatrix = viewingMatrix * transformMatrix;
 	return modelViewMatrix;
 	
+}
+
+//Do update logic for view manager
+//Currently makes scene auto rotate if this option is turned on
+void ViewManager::doUpdate(double timeElapsed)
+{
+	if (autoRotate)
+	{
+		xAngle += rotationSpeed * timeElapsed;
+	}
+
 }

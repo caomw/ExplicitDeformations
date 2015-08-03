@@ -16,6 +16,8 @@ public:
 	void mouseClick(int button, int state, int x, int y);
 	void mouseMove(int x, int y);
 	glm::mat4 doTransform();
+	void toggleAutoRotate() {autoRotate = !autoRotate;}
+	void doUpdate(double timeElapsed);
 	
 private:
 	bool isTracking;							//True if left button is held so that movement turns the object
@@ -24,4 +26,6 @@ private:
 	float yAngle;								//Amount of rotation due to vertical mouse movements
 	float xAngle;								//Amount of rotation due to horizontal mouse movements
 	float zoomLevel;							//Amount of zoom that occurred
+	bool autoRotate;							//True if automatically spins, false if not
+	double rotationSpeed;						//Speed at which scene rotates when auto rotate is turned on
 };

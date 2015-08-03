@@ -129,7 +129,6 @@ void render()
 		
 	}
 	
-
 	//for (int i = 0; i < 1; i++)
 	for (int i = 0; i < 10; i++)
 	{				
@@ -139,6 +138,8 @@ void render()
 	//startTime = glutGet(GLUT_ELAPSED_TIME);
 		
 	particleSystem -> calculateNormals();
+
+	viewManager.doUpdate(timeElapsed);
 
 	//Render Logic
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -298,7 +299,7 @@ int main(int argCount, char **argValue)
 
 			//particleSystem -> loadSpecialState();
 			
-			keyboard = new Keyboard(particleSystem, logger);
+			keyboard = new Keyboard(particleSystem, &viewManager, logger);
 
 			glutInit(&argCount,argValue);
 			glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE | GLUT_RGBA);
