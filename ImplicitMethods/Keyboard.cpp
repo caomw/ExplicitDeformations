@@ -58,6 +58,14 @@ void Keyboard::keyPressed(unsigned char key)
 		case 'R':
 			particleSystem -> reset();
 			break;
+		case 'e':
+		case 'E':
+			particleSystem -> invertTetra();
+			break;
+		case 'g':
+		case 'G':
+			particleSystem -> toggleRGB();
+			break;
 		case 'i':
 		case 'I':
 			particleSystem -> toggleImageRendering();

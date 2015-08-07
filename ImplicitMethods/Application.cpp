@@ -133,7 +133,7 @@ void render()
 		{
 		case 1:					//Stanford Method
 			timeElapsed = 0.005;
-			particleSystem->setConstants(700,700);
+			particleSystem->setConstants(700,700,0.5);
 			break;
 		case 2:					//Georgia Institute Method
 			timeElapsed = 0.00225;

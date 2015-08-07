@@ -54,6 +54,9 @@
     <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NumericalRecipes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ParticleSystem.h">
@@ -87,6 +90,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TetraMeshReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NumericalRecipes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="nrutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

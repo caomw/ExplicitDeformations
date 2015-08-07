@@ -284,6 +284,27 @@ void StanfordSystem::doUpdate(double deltaT)
 	}
 	#endif
     
+	/*
+	double FOneIndex[9];
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			FOneIndex[i*3 + j] = F[i][j];
+		}
+	}
+
+	uninvertF(FOneIndex);
+
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			F[i][j] = FOneIndex[i*3 + j];
+		}
+	}
+	*/
+
     //greenStrain = (1 / 2) * (F' * F - eye(3));
 	//Part I: F' * F
 	double greenStrain[DIMENSION][DIMENSION];

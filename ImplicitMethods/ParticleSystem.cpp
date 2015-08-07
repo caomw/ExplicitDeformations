@@ -8,6 +8,7 @@
 #include <iostream>
 #include "targa.h"
 #include "Macros.h"
+#include "NumericalRecipes.h"
 
 #include "ParticleSystem.h"
 
@@ -276,6 +277,45 @@ void ParticleSystem::reset()
 
 }
 
+// This method will invert all tetrahedra by mutiplying them by a scale factor of -1
+// This allows easy testing of the uninversion functionality
+void ParticleSystem::invertTetra()
+{
+	
+	double scaleFactor = -1;
+	double scaleTransform[3][3] = {{scaleFactor, 0, 0}, {0, scaleFactor, 0}, {0, 0, scaleFactor}};
+	
+	////////////////////////////////
+	//do transform
+
+	
+	double * temp = new double [DIMENSION * numVertices];
+	
+	for (int i = 0; i < DIMENSION; i++) //Current row # of calculated final matrix element						
+	{																											
+		for (int j = 0; j < numVertices; j++) //current col # of calculated final matrix element					
+		{																										
+			temp[i * numVertices + j] = 0;																				
+			for (int k = 0; k < 3; k++) //current col in left matrix and row in right matrix for summing
+			{																									
+				temp[i * numVertices + j] += scaleTransform[i][k] * defVertices[j].position[k];											
+			}																									
+																												
+		}																										
+																												
+	}			
+	
+	for (int i = 0; i < DIMENSION; i++)
+	{
+		for (int j = 0; j < numVertices; j++)
+		{
+			defVertices[j].position[i] = temp[i * numVertices + j];
+		}
+	}
+
+	delete [] temp;
+}
+
 //Update Method - Implements one time step for the animation
 //Uses hooke's law with implicit methods to construct matrix A and vector b then calls the conjugate gradient method to find deltaV
 //This is then used to update the particle velocities and in turn the positions
@@ -432,7 +472,254 @@ void ParticleSystem::doCollisionDetectionAndResponse(double deltaT)
 
 }
 
+//This method uses the SVD to uninvert F based on the paper by Fedkiw
+//F is the matrix representing the change in the deformed vertices versus the original vertices
+//Algorithm is based directly on the paper at: http://physbam.stanford.edu/~fedkiw/papers/stanford2004-04.pdf
+void ParticleSystem::uninvertF( double * F)
+{
+	if (!doUninvert)
+	{
+		return;
+	}
 
+	static int numTimes = 1;
+
+	#ifdef DEBUGGING
+	if (logger -> isLogging && logger ->loggingLevel >= logger ->MEDIUM)
+	{
+		cout << "F:" << endl;
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				cout << F[i * 3 + j] << " ";
+			}
+			cout << endl;
+		}
+	}
+	#endif
+
+	
+	double determinantF = determinant3By3SingleIndex(F);
+	if (determinantF < 0)
+	{
+		//cout << "Inverted tetrahedron -- determinant of F is less than 0" << endl;
+						
+		//Step 1: establish U, V, and W matrices to find the SVD
+		float ** U = new float * [4];  //4 x 4 matrices to allow numerical recipes code to use 1 based indices
+		float ** V = new float * [4];
+		float * W = new float[4];
+
+		//Get everything allocated and initialized to zero for U, V, and W
+		for (int i = 0; i < 4; i++)
+		{
+			U[i] = new float[4];  
+			V[i] = new float[4];
+			W[i] = 0;
+		
+			U[i][0] = 0;
+			V[i][0] = 0;
+
+			for (int j = 0; j < 4; j++)
+			{
+				U[i][j] = 0;  
+				V[i][j] = 0;
+
+			}
+		
+		}
+
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				U[i+1][j+1] = F[i * DIMENSION + j];  //U starts out equal to F; offset by one because the svd code uses indexes starting by 1
+			}	
+		}
+
+		#ifdef DEBUGGING
+		if (logger -> isLogging && logger ->loggingLevel >= logger ->MEDIUM)
+		{
+			cout << "U:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				for (int j = 0; j <= 3; j++)
+				{
+					cout << U[i][j] << " ";
+
+				}
+				cout << endl;
+			}
+
+			cout << "num times is " << numTimes << endl;
+		}
+		#endif
+			
+		//Step 2: find the svd of F
+		svdcmp(U, 3, 3, W, V);
+
+		#ifdef DEBUGGING
+		if (logger -> isLogging && logger ->loggingLevel >= logger ->MEDIUM)
+		{
+			cout << "SVD for F:" << endl;
+			cout << "U:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				for (int j = 0; j <= 3; j++)
+				{
+					cout << U[i][j] << " ";
+
+				}
+				cout << endl;
+			}
+
+			cout << "W:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				cout << W[i] << " ";
+			}
+			cout << endl;
+
+			cout << "V:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				for (int j = 0; j <= 3; j++)
+				{
+					cout << V[i][j] << " ";
+
+				}
+				cout << endl;
+			}
+		}
+		#endif
+
+			
+		//Step 3: Find the min value in W
+		//If the determinant of U is less than 0 (which it should be if it got here),
+		//negate that column in U, W, and V
+		//This is the essence of uninversion
+
+		//Find the min value in diagonal matrix W
+		int minIndex = 1; //Index of the min value
+		for (int i = 2; i <=3; i++)
+		{
+			if (W[i] < W[minIndex])
+			{
+				minIndex = i;
+			}
+
+		}
+
+		//Negate that column in U, V, and W
+		if (determinant3By3OneBasedIndices(U) < 0)
+		{
+			for (int i = 1; i <= 3; i++)
+			{
+				U[i][minIndex] = -U[i][minIndex];
+			}
+			W[minIndex] = -W[minIndex];
+
+			for (int i = 1; i <= 3; i++)
+			{
+				V[i][minIndex] = -V[i][minIndex];
+	        }
+		}
+
+		//Final copies of U, V, and W that will be used to mutltiply the matrices back together
+		//and reform F
+		double lastU[3][3];
+		double lastW[3][3];
+		double lastV[3][3];
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				lastU[i][j] = U[i+1][j+1];
+				lastV[i][j] = V[j+1][i+1];  //Transposed
+			}
+		}
+
+		lastW[0][0] = W[1];  lastW[0][1] = 0;     lastW[0][2] = 0;
+		lastW[1][0] = 0;     lastW[1][1] = W[2];  lastW[1][2] = 0;
+		lastW[2][0] = 0;     lastW[2][1] = 0;     lastW[2][2] = W[3];
+
+		#ifdef DEBUGGING
+		if (logger -> isLogging && logger ->loggingLevel >= logger ->MEDIUM)
+		{
+			cout << "CORRECTED SVD for F:" << endl;
+			cout << "U:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				for (int j = 0; j <= 3; j++)
+				{
+					cout << lastU[i][j] << " ";
+
+				}
+				cout << endl;
+			}
+
+			cout << "W:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				for (int j = 0; j <= 3; j++)
+				{
+					cout << lastW[i][j] << " ";
+
+				}
+				cout << endl;
+			}
+
+			cout << "V:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				for (int j = 0; j <= 3; j++)
+				{
+					cout << lastV[i][j] << " ";
+
+				}
+				cout << endl;
+			}
+		}
+		#endif
+
+		//F = U * W * V
+		double uTimesW[3][3];
+		multiplyMatricesATimesB(uTimesW, lastU, 3, 3, lastW, 3, 3);
+
+		double finalF[3][3];
+		multiplyMatricesATimesB(finalF, uTimesW, 3, 3, lastV, 3, 3);
+
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				F[i * DIMENSION + j] = finalF[i][j];
+			}
+		}
+
+		//Find the determinant of F and check it to make sure we actually uninverted the tetrahedra
+		double determinantF = determinant3By3SingleIndex(F);
+		
+		if (determinantF < 0)
+		{
+			cout << "bad det - uninversion algorithm did not work correctly" << endl;
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+			delete [] U[i];
+			delete [] V[i];
+		}
+
+		delete [] U;
+		delete [] V;
+		delete [] W;
+
+	} //if det F < 0...
+	
+	numTimes++;
+
+}
 
 ////Method to calculate the normals used for lighting
 ////Note that since the cross product is only defined in 3 dimensions, this method only works properly for 3 dimensions
@@ -969,10 +1256,17 @@ void ParticleSystem::setEyePos(glm::vec3 & eyePos)
 	this -> eyePos[2] = eyePos[2];
 }
 
-void ParticleSystem::setConstants(int K, int mu)
+void ParticleSystem::setConstants(double K, double mu)
 {
 	this->mu = mu;
 	this->lambda = K - (2.0/3) * mu;		//Lame's first parameter
+}
+
+void ParticleSystem::setConstants(double K, double mu, double kd)
+{
+	this->mu = mu;
+	this->lambda = K - (2.0/3) * mu;		//Lame's first parameter
+	this->kd = kd;
 }
 
 void ParticleSystem::initVBOs()
@@ -1339,6 +1633,37 @@ void ParticleSystem::increaseStraightRestLength(double amount)
 	//}
 
 	//sprintf(text, "Straight Rest Length: %f", restLengthValues[0]);
+}
+
+//Method to toggle whether or not auomatic uninversion occurs
+void ParticleSystem::toggleUninversion()
+{
+	doUninvert = !doUninvert;
+
+	if (doUninvert)
+	{
+		sprintf(text, "Uninversion On");
+	}
+	else
+	{
+		sprintf(text, "Uninversion Off");
+	}
+}
+
+//Method to toggle whether or not rgb (without lighting) is used
+//This mode can be useful for finding inverted tetrahedra - the direction of the rgb colors
+//should consistently be the same no matter what the orientation of the tetrahedron is
+void ParticleSystem::toggleRGB()
+{
+	useRGBColor = !useRGBColor;
+	if (useRGBColor)
+	{
+		glDisable(GL_LIGHTING);
+	}
+	else
+	{
+		glEnable(GL_LIGHTING);
+	}
 }
 
 //Method to toggle whether or not informational messages are shown on screen
