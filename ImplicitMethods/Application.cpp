@@ -132,8 +132,7 @@ void render()
 		switch (whichMethod)
 		{
 		case 1:					//Stanford Method
-			//timeElapsed = 0.00225;
-			timeElapsed = 0.0000001;
+			timeElapsed = 0.005;
 			particleSystem->setConstants(700,700);
 			break;
 		case 2:					//Georgia Institute Method
