@@ -14,6 +14,7 @@ using namespace std;
 const double epsilon = 1e-12;	//Used to check approximate equality to 0
 int iteration = 1;
 
+//Constructor
 StanfordSystem::StanfordSystem(Vertex * vertexList, int vertexCount, int * tetraList, int tetraCount, Logger * logger) : ParticleSystem(vertexList, vertexCount, tetraList, tetraCount, logger)
 {
 	strcpy(text, "Method 1");
@@ -183,6 +184,7 @@ StanfordSystem::~StanfordSystem()
 	delete [] invDm;
 }
 
+//Overridden update method
 void StanfordSystem::doUpdate(double deltaT)
 {
 	#ifdef DEBUGGING

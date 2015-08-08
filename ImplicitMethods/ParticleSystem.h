@@ -13,12 +13,8 @@
 #define TEXT_SIZE 256	//Maximum length of the on screen message text
 
 //Particle System class
-//It builds a grid of particles (represented by Particle objects)
-//These are then held together by springs using hooke's laws.  One edge corresponds to each spring.
-//Hooke's law is used to represent the springs, with both a spring component and a damping comopnent
-//Implicit methods are used for the integration.  This requires a solving system but allows much larger spring constants without instability
-//and potentially allows more efficient implementation
-//A gravity component is also present
+//This is the base class for all other classes derived from ParticleSystem
+//A tetrahedral mesh must be loaded.  It then allows deformations to be implemented on the mesh.
 class ParticleSystem
 {
 	public:

@@ -3,6 +3,7 @@
 
 using namespace std;
 
+//This method opens the stellar file but does not start reading it
 bool TetraMeshReader::openFile(char * nodeFileName, char * elementFileName)
 {
 	nodeFile.open(nodeFileName, ios::in);
@@ -28,6 +29,7 @@ bool TetraMeshReader::openFile(char * nodeFileName, char * elementFileName)
 
 }
 
+//This method loads the data for a stellar input file
 bool TetraMeshReader::loadData(Vertex *& vertexList, int & vertexCount, int *& tetraList, int & tetraCount, Logger * logger)
 {
 	if (!nodeFile.is_open() || !elementFile.is_open())
@@ -226,6 +228,7 @@ bool TetraMeshReader::loadData(Vertex *& vertexList, int & vertexCount, int *& t
 
 }
 
+//This method closes the stellar file
 void TetraMeshReader::closeFile()
 {
 	nodeFile.close();

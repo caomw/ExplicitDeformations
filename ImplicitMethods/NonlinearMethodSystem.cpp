@@ -9,6 +9,7 @@ using namespace std;
 
 const double epsilon = 1e-12;	//Used to check approximate equality to 0
 
+//Constructor
 NonlinearMethodSystem::NonlinearMethodSystem(Vertex * vertexList, int vertexCount, int * tetraList, int tetraCount, Logger * logger) : ParticleSystem(vertexList, vertexCount, tetraList, tetraCount, logger)
 {
 	strcpy(text, "Method 3");
@@ -146,6 +147,7 @@ NonlinearMethodSystem::~NonlinearMethodSystem()
 	delete [] rwWeights;
 }
 
+//Overridden update method
 void NonlinearMethodSystem::doUpdate(double deltaT)
 {
 	#ifdef DEBUGGING

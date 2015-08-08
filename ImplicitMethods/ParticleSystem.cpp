@@ -16,22 +16,6 @@
 
 using namespace std;
 
-////////////////////////////////////////
-//Main ParticleSystem class implementation
-////It builds a grid of particles (represented by Particle objects)
-//These are then held together by springs using hooke's laws.  One edge corresponds to each spring.
-//Hooke's law is used to represent the springs, with both a spring component and a damping comopnent
-//Implicit methods are used for the integration.  This requires a solving system but allows much larger spring constants without instability
-//and potentially allows more efficient implementation
-//A gravity component is also present
-////////////////////////////////////////
-//Issue conclusions - for 3 tetrahedra, it has issues in C++.  It does not seem to have them in Matlab.
-//It seems to "blast off" upwards.  It does this without collisions response even present.
-//For a couple iterations, the computed def vertices were the same between C++ and Matlab
-//I think we need to run the implementations side by side, only printing defVertices, and finding out when and where they divege
-//Then, at that iteration, break it doesn by strain, force, etc, and find out the big piece that's wrong
-//Then drill down further to figure out why.
-
 //Based on:
 //http://graphics.snu.ac.kr/~kjchoi/publication/cloth.pdf - Explicit and implicit formulas for hooke's law - page 3
 //http://www.amath.unc.edu/Faculty/mucha/Reprints/SCAclothcontrolpreprint.pdf - Formulas for A and b in Ax = b system - page 5
@@ -327,6 +311,7 @@ void ParticleSystem::doUpdate(double deltaT)
 	
 }
 
+//Implement collision detection against the floor and collison response
 void ParticleSystem::doCollisionDetectionAndResponse(double deltaT)
 {
 	//for k = 1:size(defVertices,2)
@@ -976,6 +961,7 @@ void ParticleSystem::calculateNormals()
 }
 
 //Render the particles
+//This method is now DEPRECATED
 void ParticleSystem::doRender(double videoWriteDeltaT)
 {
 	
@@ -1258,12 +1244,14 @@ void ParticleSystem::setEyePos(glm::vec3 & eyePos)
 	this -> eyePos[2] = eyePos[2];
 }
 
+//Method to externally set K and mu constants
 void ParticleSystem::setConstants(double K, double mu)
 {
 	this->mu = mu;
 	this->lambda = K - (2.0/3) * mu;		//Lame's first parameter
 }
 
+//Method to externally set K, mu, and kd constants
 void ParticleSystem::setConstants(double K, double mu, double kd)
 {
 	this->mu = mu;
@@ -1271,6 +1259,7 @@ void ParticleSystem::setConstants(double K, double mu, double kd)
 	this->kd = kd;
 }
 
+//Methods to invit Vertex buffer objects
 void ParticleSystem::initVBOs()
 {
 	//Tetrahedral mesh
@@ -1282,6 +1271,7 @@ void ParticleSystem::initVBOs()
 	glGenBuffers(1, floorIndexVboHandle);
 }
 
+//Method to send vertex buffer objects to graphics card, needed for GLSL
 void ParticleSystem::sendVBOs()
 {
 	//Tetrahedral Mesh
@@ -1351,6 +1341,7 @@ void ParticleSystem::sendVBOs()
 
 }
 
+//Method to render output to screen
 void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix)
 {
 	if (this->useRGBColor)
@@ -1387,6 +1378,7 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 		glMatrixMode(GL_MODELVIEW);
 	}
 
+	//Render to a series of images that can be collated into a video
 	if (renderToImage)
 	{
 
@@ -1429,6 +1421,7 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 		
 }
 
+//Render with full GLSL lighting
 void ParticleSystem::doRenderWithLighting(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix)
 {
 	sendVBOs();
@@ -1571,12 +1564,11 @@ void ParticleSystem::doRenderWithLighting(double videoWriteDeltaT, glm::mat4 & p
 	glUseProgram(0);
 }
 
+//Render in special RGB mode for debugging, with no lighting
 void ParticleSystem::doRenderRGB(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix)
 {
 	glm::mat4 totalMatrix = projMatrix * tetraModelViewMatrix;
-	//glm::mat4 normalMatrix = glm::inverse(tetraModelViewMatrix);
-	//normalMatrix = glm::transpose(normalMatrix);
-	
+		
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(&totalMatrix[0][0]);
 
@@ -1760,6 +1752,7 @@ void ParticleSystem::toggleInfoText()
 	showInfoText = !showInfoText;
 }
 
+//Method to toggle full ambient (in lighting) mode
 void ParticleSystem::toggleFullAmbient()
 {
 	ambientMode = !ambientMode;
@@ -1809,6 +1802,7 @@ void ParticleSystem::toggleImageRendering()
 	}
 }
 
+//This method implements a transform on the mesh
 void ParticleSystem::doTransform()
 {
 
@@ -1858,6 +1852,7 @@ void ParticleSystem::doTransform()
 
 }
 
+//Prints information for a number of items in the program when called
 void ParticleSystem::printStateReport()
 {
 	/*
@@ -1903,7 +1898,7 @@ void ParticleSystem::printStateReport()
 
 }
 
-//This method is going to load up a special state that lets us get roll'n with some error anlaysis!
+//This method can be used to load some information when desired to help with debugging
 void ParticleSystem::loadSpecialState()
 {
 	

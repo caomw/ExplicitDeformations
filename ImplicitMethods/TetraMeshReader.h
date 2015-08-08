@@ -5,6 +5,7 @@
 
 using namespace std;
 
+//This class reads a tetrahedral model from a Stellar input file
 class TetraMeshReader
 {
 private:

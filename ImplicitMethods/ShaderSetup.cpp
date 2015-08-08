@@ -1,4 +1,4 @@
-//Han Wei Shen's Shader setup code from class
+//Han Wei Shen's Shader setup code from real time rendering class
 //http://www.cse.ohio-state.edu/~hwshen/5542/Site/Slides_files/shaderSetup.C
 #include <io.h>
 #include <stdio.h>

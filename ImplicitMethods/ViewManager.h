@@ -8,7 +8,8 @@ const int MOUSE_DIMENSION = 2;	//Number of dimensions for processing mouse click
 //This class manages the current view
 //Currently it manages
 //1) Holding the left button and dragging left, right, up, and down - this rotates the grid object
-//2) Pressing middle button (zoom in) or right button (zoom out)
+//2) Holding the middle button and dragging it to translate
+//3) Holding the right button and dragging it to zoom
 class ViewManager
 {
 public:
