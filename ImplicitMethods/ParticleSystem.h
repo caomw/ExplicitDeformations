@@ -34,6 +34,7 @@ class ParticleSystem
 	void calculateNormals();
 	void doRender(double videoWriteDeltaT);
 	void doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix);
+	void doRenderRGB(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix);
 	//UI Methods
 	void increaseEarthGravity(double amount);
 	void increaseStraightRestLength(double amount);
