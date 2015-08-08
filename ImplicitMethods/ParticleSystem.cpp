@@ -220,6 +220,8 @@ ParticleSystem::ParticleSystem(Vertex * vertexList, int vertexCount, int * tetra
 	matShininess[0] = 10000;
 	
 	ambientMode = false;
+	useRGBColor = false;
+	doUninvert = true;
 }
 
 //Destructor - free all memory for dynamically allocated arrays
@@ -477,7 +479,7 @@ void ParticleSystem::doCollisionDetectionAndResponse(double deltaT)
 //Algorithm is based directly on the paper at: http://physbam.stanford.edu/~fedkiw/papers/stanford2004-04.pdf
 void ParticleSystem::uninvertF( double * F)
 {
-	if (!doUninvert)
+	if (!doUninvert) //Guarantee any caller checks the setting
 	{
 		return;
 	}
