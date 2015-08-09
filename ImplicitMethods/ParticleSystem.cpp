@@ -8,28 +8,13 @@
 #include <iostream>
 #include "targa.h"
 #include "Macros.h"
+#include "NumericalRecipes.h"
 
 #include "ParticleSystem.h"
 
 
 
 using namespace std;
-
-////////////////////////////////////////
-//Main ParticleSystem class implementation
-////It builds a grid of particles (represented by Particle objects)
-//These are then held together by springs using hooke's laws.  One edge corresponds to each spring.
-//Hooke's law is used to represent the springs, with both a spring component and a damping comopnent
-//Implicit methods are used for the integration.  This requires a solving system but allows much larger spring constants without instability
-//and potentially allows more efficient implementation
-//A gravity component is also present
-////////////////////////////////////////
-//Issue conclusions - for 3 tetrahedra, it has issues in C++.  It does not seem to have them in Matlab.
-//It seems to "blast off" upwards.  It does this without collisions response even present.
-//For a couple iterations, the computed def vertices were the same between C++ and Matlab
-//I think we need to run the implementations side by side, only printing defVertices, and finding out when and where they divege
-//Then, at that iteration, break it doesn by strain, force, etc, and find out the big piece that's wrong
-//Then drill down further to figure out why.
 
 //Based on:
 //http://graphics.snu.ac.kr/~kjchoi/publication/cloth.pdf - Explicit and implicit formulas for hooke's law - page 3
@@ -219,6 +204,8 @@ ParticleSystem::ParticleSystem(Vertex * vertexList, int vertexCount, int * tetra
 	matShininess[0] = 10000;
 	
 	ambientMode = false;
+	useRGBColor = false;
+	doUninvert = true;
 }
 
 //Destructor - free all memory for dynamically allocated arrays
@@ -276,6 +263,45 @@ void ParticleSystem::reset()
 
 }
 
+// This method will invert all tetrahedra by mutiplying them by a scale factor of -1
+// This allows easy testing of the uninversion functionality
+void ParticleSystem::invertTetra()
+{
+	
+	double scaleFactor = -1;
+	double scaleTransform[3][3] = {{scaleFactor, 0, 0}, {0, scaleFactor, 0}, {0, 0, scaleFactor}};
+	
+	////////////////////////////////
+	//do transform
+
+	
+	double * temp = new double [DIMENSION * numVertices];
+	
+	for (int i = 0; i < DIMENSION; i++) //Current row # of calculated final matrix element						
+	{																											
+		for (int j = 0; j < numVertices; j++) //current col # of calculated final matrix element					
+		{																										
+			temp[i * numVertices + j] = 0;																				
+			for (int k = 0; k < 3; k++) //current col in left matrix and row in right matrix for summing
+			{																									
+				temp[i * numVertices + j] += scaleTransform[i][k] * defVertices[j].position[k];											
+			}																									
+																												
+		}																										
+																												
+	}			
+	
+	for (int i = 0; i < DIMENSION; i++)
+	{
+		for (int j = 0; j < numVertices; j++)
+		{
+			defVertices[j].position[i] = temp[i * numVertices + j];
+		}
+	}
+
+	delete [] temp;
+}
+
 //Update Method - Implements one time step for the animation
 //Uses hooke's law with implicit methods to construct matrix A and vector b then calls the conjugate gradient method to find deltaV
 //This is then used to update the particle velocities and in turn the positions
@@ -285,6 +311,7 @@ void ParticleSystem::doUpdate(double deltaT)
 	
 }
 
+//Implement collision detection against the floor and collison response
 void ParticleSystem::doCollisionDetectionAndResponse(double deltaT)
 {
 	//for k = 1:size(defVertices,2)
@@ -432,7 +459,254 @@ void ParticleSystem::doCollisionDetectionAndResponse(double deltaT)
 
 }
 
+//This method uses the SVD to uninvert F based on the paper by Fedkiw
+//F is the matrix representing the change in the deformed vertices versus the original vertices
+//Algorithm is based directly on the paper at: http://physbam.stanford.edu/~fedkiw/papers/stanford2004-04.pdf
+void ParticleSystem::uninvertF( double * F)
+{
+	if (!doUninvert) //Guarantee any caller checks the setting
+	{
+		return;
+	}
 
+	static int numTimes = 1;
+
+	#ifdef DEBUGGING
+	if (logger -> isLogging && logger ->loggingLevel >= logger ->MEDIUM)
+	{
+		cout << "F:" << endl;
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				cout << F[i * 3 + j] << " ";
+			}
+			cout << endl;
+		}
+	}
+	#endif
+
+	
+	double determinantF = determinant3By3SingleIndex(F);
+	if (determinantF < 0)
+	{
+		//cout << "Inverted tetrahedron -- determinant of F is less than 0" << endl;
+						
+		//Step 1: establish U, V, and W matrices to find the SVD
+		float ** U = new float * [4];  //4 x 4 matrices to allow numerical recipes code to use 1 based indices
+		float ** V = new float * [4];
+		float * W = new float[4];
+
+		//Get everything allocated and initialized to zero for U, V, and W
+		for (int i = 0; i < 4; i++)
+		{
+			U[i] = new float[4];  
+			V[i] = new float[4];
+			W[i] = 0;
+		
+			U[i][0] = 0;
+			V[i][0] = 0;
+
+			for (int j = 0; j < 4; j++)
+			{
+				U[i][j] = 0;  
+				V[i][j] = 0;
+
+			}
+		
+		}
+
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				U[i+1][j+1] = F[i * DIMENSION + j];  //U starts out equal to F; offset by one because the svd code uses indexes starting by 1
+			}	
+		}
+
+		#ifdef DEBUGGING
+		if (logger -> isLogging && logger ->loggingLevel >= logger ->MEDIUM)
+		{
+			cout << "U:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				for (int j = 0; j <= 3; j++)
+				{
+					cout << U[i][j] << " ";
+
+				}
+				cout << endl;
+			}
+
+			cout << "num times is " << numTimes << endl;
+		}
+		#endif
+			
+		//Step 2: find the svd of F
+		svdcmp(U, 3, 3, W, V);
+
+		#ifdef DEBUGGING
+		if (logger -> isLogging && logger ->loggingLevel >= logger ->MEDIUM)
+		{
+			cout << "SVD for F:" << endl;
+			cout << "U:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				for (int j = 0; j <= 3; j++)
+				{
+					cout << U[i][j] << " ";
+
+				}
+				cout << endl;
+			}
+
+			cout << "W:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				cout << W[i] << " ";
+			}
+			cout << endl;
+
+			cout << "V:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				for (int j = 0; j <= 3; j++)
+				{
+					cout << V[i][j] << " ";
+
+				}
+				cout << endl;
+			}
+		}
+		#endif
+
+			
+		//Step 3: Find the min value in W
+		//If the determinant of U is less than 0 (which it should be if it got here),
+		//negate that column in U, W, and V
+		//This is the essence of uninversion
+
+		//Find the min value in diagonal matrix W
+		int minIndex = 1; //Index of the min value
+		for (int i = 2; i <=3; i++)
+		{
+			if (W[i] < W[minIndex])
+			{
+				minIndex = i;
+			}
+
+		}
+
+		//Negate that column in U, V, and W
+		if (determinant3By3OneBasedIndices(U) < 0)
+		{
+			for (int i = 1; i <= 3; i++)
+			{
+				U[i][minIndex] = -U[i][minIndex];
+			}
+			W[minIndex] = -W[minIndex];
+
+			for (int i = 1; i <= 3; i++)
+			{
+				V[i][minIndex] = -V[i][minIndex];
+	        }
+		}
+
+		//Final copies of U, V, and W that will be used to mutltiply the matrices back together
+		//and reform F
+		double lastU[3][3];
+		double lastW[3][3];
+		double lastV[3][3];
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				lastU[i][j] = U[i+1][j+1];
+				lastV[i][j] = V[j+1][i+1];  //Transposed
+			}
+		}
+
+		lastW[0][0] = W[1];  lastW[0][1] = 0;     lastW[0][2] = 0;
+		lastW[1][0] = 0;     lastW[1][1] = W[2];  lastW[1][2] = 0;
+		lastW[2][0] = 0;     lastW[2][1] = 0;     lastW[2][2] = W[3];
+
+		#ifdef DEBUGGING
+		if (logger -> isLogging && logger ->loggingLevel >= logger ->MEDIUM)
+		{
+			cout << "CORRECTED SVD for F:" << endl;
+			cout << "U:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				for (int j = 0; j <= 3; j++)
+				{
+					cout << lastU[i][j] << " ";
+
+				}
+				cout << endl;
+			}
+
+			cout << "W:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				for (int j = 0; j <= 3; j++)
+				{
+					cout << lastW[i][j] << " ";
+
+				}
+				cout << endl;
+			}
+
+			cout << "V:" << endl;
+			for (int i = 0; i <= 3; i++)
+			{
+				for (int j = 0; j <= 3; j++)
+				{
+					cout << lastV[i][j] << " ";
+
+				}
+				cout << endl;
+			}
+		}
+		#endif
+
+		//F = U * W * V
+		double uTimesW[3][3];
+		multiplyMatricesATimesB(uTimesW, lastU, 3, 3, lastW, 3, 3);
+
+		double finalF[3][3];
+		multiplyMatricesATimesB(finalF, uTimesW, 3, 3, lastV, 3, 3);
+
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				F[i * DIMENSION + j] = finalF[i][j];
+			}
+		}
+
+		//Find the determinant of F and check it to make sure we actually uninverted the tetrahedra
+		double determinantF = determinant3By3SingleIndex(F);
+		
+		if (determinantF < 0)
+		{
+			cout << "bad det - uninversion algorithm did not work correctly" << endl;
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+			delete [] U[i];
+			delete [] V[i];
+		}
+
+		delete [] U;
+		delete [] V;
+		delete [] W;
+
+	} //if det F < 0...
+	
+	numTimes++;
+
+}
 
 ////Method to calculate the normals used for lighting
 ////Note that since the cross product is only defined in 3 dimensions, this method only works properly for 3 dimensions
@@ -687,6 +961,7 @@ void ParticleSystem::calculateNormals()
 }
 
 //Render the particles
+//This method is now DEPRECATED
 void ParticleSystem::doRender(double videoWriteDeltaT)
 {
 	
@@ -969,12 +1244,22 @@ void ParticleSystem::setEyePos(glm::vec3 & eyePos)
 	this -> eyePos[2] = eyePos[2];
 }
 
-void ParticleSystem::setConstants(int K, int mu)
+//Method to externally set K and mu constants
+void ParticleSystem::setConstants(double K, double mu)
 {
 	this->mu = mu;
 	this->lambda = K - (2.0/3) * mu;		//Lame's first parameter
 }
 
+//Method to externally set K, mu, and kd constants
+void ParticleSystem::setConstants(double K, double mu, double kd)
+{
+	this->mu = mu;
+	this->lambda = K - (2.0/3) * mu;		//Lame's first parameter
+	this->kd = kd;
+}
+
+//Methods to invit Vertex buffer objects
 void ParticleSystem::initVBOs()
 {
 	//Tetrahedral mesh
@@ -986,6 +1271,7 @@ void ParticleSystem::initVBOs()
 	glGenBuffers(1, floorIndexVboHandle);
 }
 
+//Method to send vertex buffer objects to graphics card, needed for GLSL
 void ParticleSystem::sendVBOs()
 {
 	//Tetrahedral Mesh
@@ -1055,7 +1341,88 @@ void ParticleSystem::sendVBOs()
 
 }
 
+//Method to render output to screen
 void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix)
+{
+	if (this->useRGBColor)
+	{
+		doRenderRGB(videoWriteDeltaT, projMatrix, floorModelViewMatrix, tetraModelViewMatrix);
+	}
+	else
+	{
+		doRenderWithLighting(videoWriteDeltaT, projMatrix, floorModelViewMatrix, tetraModelViewMatrix);
+	}
+	
+	//Render onscreen text with informational messages
+	//Note: This now will be written to the video images
+	if (showInfoText)
+	{
+		//Reference: http://programming-technique.blogspot.com/2012/05/font-rendering-in-glut-using-bitmap.html
+		glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		gluOrtho2D(0, windowWidth, 0, windowHeight);
+		
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		glRasterPos2i(20, 20);
+		for (int i = 0; i < strlen(text); i++)
+		{
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
+		}
+		glPopMatrix();
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+	}
+
+	//Render to a series of images that can be collated into a video
+	if (renderToImage)
+	{
+
+		//if (timeSinceVideoWrite >= videoWriteDeltaT)
+		{
+			timeSinceVideoWrite = 0.0;
+			//Read the rendered image into a buffer
+			glFlush();
+			glReadPixels(0, 0, windowWidth, windowHeight, GL_RGBA, GL_UNSIGNED_BYTE, screenBuffer);
+
+			//Vertically flip the image in memory - it flips two rows from the screen in memory at a time
+			for (int i = 0; i < windowHeight / 2; i++)
+			{
+				if (i != windowHeight - i)
+				{
+					memcpy(screenRowTemp,(uint8_t *)&screenBuffer[i * windowWidth * 4], windowWidth * 4 * sizeof(uint8_t));
+					memcpy((uint8_t *)&screenBuffer[i * windowWidth * 4], (uint8_t *)&screenBuffer[(windowHeight - i) * windowWidth * 4], windowWidth * 4 * sizeof(uint8_t));
+					memcpy((uint8_t *)&screenBuffer[(windowHeight - i) * windowWidth * 4], screenRowTemp, windowWidth * 4 * sizeof(uint8_t));
+				}
+			}
+		
+			//Write a new targa file, with a new number
+			sprintf(imageFileName, "images\\ImplicitMethods%d.tga", frameNumber);
+			tga_result result = tga_write_rgb(imageFileName, screenBuffer, windowWidth, windowHeight, 32);
+			#ifdef DEBUGGING
+			if (logger -> isLogging && logger -> loggingLevel >= logger -> LIGHT)
+			{
+				if (result != TGA_NOERR)
+				{
+					cout << tga_error(result) << " at frame number " << frameNumber << endl;
+				}
+			}
+			#endif
+
+			frameNumber++;
+		}
+
+		
+	}
+		
+}
+
+//Render with full GLSL lighting
+void ParticleSystem::doRenderWithLighting(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix)
 {
 	sendVBOs();
 
@@ -1195,74 +1562,89 @@ void ParticleSystem::doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, g
 	glDrawElements(GL_TRIANGLES, floorIndices.size(), GL_UNSIGNED_INT, (char *) NULL + 0);
 
 	glUseProgram(0);
-
-	//Render onscreen text with informational messages
-	//Note: This now will be written to the video images
-	if (showInfoText)
-	{
-		//Reference: http://programming-technique.blogspot.com/2012/05/font-rendering-in-glut-using-bitmap.html
-		glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		gluOrtho2D(0, windowWidth, 0, windowHeight);
-		
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-		glRasterPos2i(20, 20);
-		for (int i = 0; i < strlen(text); i++)
-		{
-			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
-		}
-		glPopMatrix();
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-	}
-
-	if (renderToImage)
-	{
-
-		//if (timeSinceVideoWrite >= videoWriteDeltaT)
-		{
-			timeSinceVideoWrite = 0.0;
-			//Read the rendered image into a buffer
-			glFlush();
-			glReadPixels(0, 0, windowWidth, windowHeight, GL_RGBA, GL_UNSIGNED_BYTE, screenBuffer);
-
-			//Vertically flip the image in memory - it flips two rows from the screen in memory at a time
-			for (int i = 0; i < windowHeight / 2; i++)
-			{
-				if (i != windowHeight - i)
-				{
-					memcpy(screenRowTemp,(uint8_t *)&screenBuffer[i * windowWidth * 4], windowWidth * 4 * sizeof(uint8_t));
-					memcpy((uint8_t *)&screenBuffer[i * windowWidth * 4], (uint8_t *)&screenBuffer[(windowHeight - i) * windowWidth * 4], windowWidth * 4 * sizeof(uint8_t));
-					memcpy((uint8_t *)&screenBuffer[(windowHeight - i) * windowWidth * 4], screenRowTemp, windowWidth * 4 * sizeof(uint8_t));
-				}
-			}
-		
-			//Write a new targa file, with a new number
-			sprintf(imageFileName, "images\\ImplicitMethods%d.tga", frameNumber);
-			tga_result result = tga_write_rgb(imageFileName, screenBuffer, windowWidth, windowHeight, 32);
-			#ifdef DEBUGGING
-			if (logger -> isLogging && logger -> loggingLevel >= logger -> LIGHT)
-			{
-				if (result != TGA_NOERR)
-				{
-					cout << tga_error(result) << " at frame number " << frameNumber << endl;
-				}
-			}
-			#endif
-
-			frameNumber++;
-		}
-
-		
-	}
-		
 }
 
+//Render in special RGB mode for debugging, with no lighting
+void ParticleSystem::doRenderRGB(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix)
+{
+	glm::mat4 totalMatrix = projMatrix * tetraModelViewMatrix;
+		
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(&totalMatrix[0][0]);
+
+	for (int i = 0; i < numTetra; i++)
+	{
+		//glColor3f(myTetraColor, 1.0, 0.0f);
+		glBegin(GL_TRIANGLES);
+		//Counter clockwise winding
+		//Triangle 1
+		glColor3f(1.0f, 0.0f, 0.0f);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
+		glVertex3f(defVertices[tetraList[3 * numTetra + i]].position[0], defVertices[tetraList[3 * numTetra + i]].position[1], defVertices[tetraList[3 * numTetra + i]].position[2]);  //vertex 3
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
+		
+		glColor3f(0.0f, 1.0f, 0.0f);
+		glVertex3f(defVertices[tetraList[1 * numTetra + i]].position[0], defVertices[tetraList[1 * numTetra + i]].position[1], defVertices[tetraList[1 * numTetra + i]].position[2]);  //vertex 1
+		
+		glColor3f(0.0f, 0.0f, 1.0f);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
+		glVertex3f(defVertices[tetraList[0 * numTetra + i]].position[0], defVertices[tetraList[0 * numTetra + i]].position[1], defVertices[tetraList[0 * numTetra + i]].position[2]);  //vertex 0
+		
+		
+		glColor3f(1.0f, 0.0f, 0.0f);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
+		glVertex3f(defVertices[tetraList[2 * numTetra + i]].position[0], defVertices[tetraList[2 * numTetra + i]].position[1], defVertices[tetraList[2 * numTetra + i]].position[2]);  //vertex 2
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
+		
+		glColor3f(0.0f, 1.0f, 0.0f);
+		glVertex3f(defVertices[tetraList[1 * numTetra + i]].position[0], defVertices[tetraList[1 * numTetra + i]].position[1], defVertices[tetraList[1 * numTetra + i]].position[2]);  //vertex 1
+		
+		glColor3f(0.0f, 0.0f, 1.0f);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
+		glVertex3f(defVertices[tetraList[3 * numTetra + i]].position[0], defVertices[tetraList[3 * numTetra + i]].position[1], defVertices[tetraList[3 * numTetra + i]].position[2]);  //vertex 3
+
+		glColor3f(1.0f, 0.0f, 0.0f);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
+		glVertex3f(defVertices[tetraList[2 * numTetra + i]].position[0], defVertices[tetraList[2 * numTetra + i]].position[1], defVertices[tetraList[2 * numTetra + i]].position[2]);  //vertex 2
+		
+		glColor3f(0.0f, 1.0f, 0.0f);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[3 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[3 * numTetra + i]]);
+		glVertex3f(defVertices[tetraList[3 * numTetra + i]].position[0], defVertices[tetraList[3 * numTetra + i]].position[1], defVertices[tetraList[3 * numTetra + i]].position[2]);  //vertex 3
+		
+		glColor3f(0.0f, 0.0f, 1.0f);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
+		glVertex3f(defVertices[tetraList[0 * numTetra + i]].position[0], defVertices[tetraList[0 * numTetra + i]].position[1], defVertices[tetraList[0 * numTetra + i]].position[2]);  //vertex 0
+
+		glColor3f(1.0f, 0.0f, 0.0f);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[0 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[0 * numTetra + i]]);
+		glVertex3f(defVertices[tetraList[0 * numTetra + i]].position[0], defVertices[tetraList[0 * numTetra + i]].position[1], defVertices[tetraList[0 * numTetra + i]].position[2]);  //vertex 0
+		
+		glColor3f(0.0f, 1.0f, 0.0f);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[1 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[1 * numTetra + i]]);
+		glVertex3f(defVertices[tetraList[1 * numTetra + i]].position[0], defVertices[tetraList[1 * numTetra + i]].position[1], defVertices[tetraList[1 * numTetra + i]].position[2]);  //vertex 1
+		
+		glColor3f(0.0f, 0.0f, 1.0f);
+		//glNormal3f(vertexNormals[numVertices * 0 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 1 + tetraList[2 * numTetra + i]], vertexNormals[numVertices * 2 + tetraList[2 * numTetra + i]]);
+		glVertex3f(defVertices[tetraList[2 * numTetra + i]].position[0], defVertices[tetraList[2 * numTetra + i]].position[1], defVertices[tetraList[2 * numTetra + i]].position[2]);  //vertex 2
+
+		glEnd();
+		
+	}
+
+	glColor3f(0.0f, 0.0f, 0.5f);
+	glBegin(GL_QUADS);
+		glNormal3f(0.0f, 1.0f, 0.0f);
+		glVertex3f(-10.0f, -4.0f, -10.0f);
+		glNormal3f(0.0f, 1.0f, 0.0f);
+		glVertex3f(10.0f, -4.0f, -10.0f);
+		glNormal3f(0.0f, 1.0f, 0.0f);
+		glVertex3f(10.0f, -4.0f, 10.0f);
+		glNormal3f(0.0f, 1.0f, 0.0f);
+		glVertex3f(-10.0f, -4.0f, 10.0f);
+	glEnd();
+
+
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////User Interface methods to alter attributes of the particle system///////////////////////////////
@@ -1341,12 +1723,36 @@ void ParticleSystem::increaseStraightRestLength(double amount)
 	//sprintf(text, "Straight Rest Length: %f", restLengthValues[0]);
 }
 
+//Method to toggle whether or not auomatic uninversion occurs
+void ParticleSystem::toggleUninversion()
+{
+	doUninvert = !doUninvert;
+
+	if (doUninvert)
+	{
+		sprintf(text, "Uninversion On");
+	}
+	else
+	{
+		sprintf(text, "Uninversion Off");
+	}
+}
+
+//Method to toggle whether or not rgb (without lighting) is used
+//This mode can be useful for finding inverted tetrahedra - the direction of the rgb colors
+//should consistently be the same no matter what the orientation of the tetrahedron is
+void ParticleSystem::toggleRGB()
+{
+	useRGBColor = !useRGBColor;
+}
+
 //Method to toggle whether or not informational messages are shown on screen
 void ParticleSystem::toggleInfoText()
 {
 	showInfoText = !showInfoText;
 }
 
+//Method to toggle full ambient (in lighting) mode
 void ParticleSystem::toggleFullAmbient()
 {
 	ambientMode = !ambientMode;
@@ -1396,6 +1802,7 @@ void ParticleSystem::toggleImageRendering()
 	}
 }
 
+//This method implements a transform on the mesh
 void ParticleSystem::doTransform()
 {
 
@@ -1445,6 +1852,7 @@ void ParticleSystem::doTransform()
 
 }
 
+//Prints information for a number of items in the program when called
 void ParticleSystem::printStateReport()
 {
 	/*
@@ -1490,7 +1898,7 @@ void ParticleSystem::printStateReport()
 
 }
 
-//This method is going to load up a special state that lets us get roll'n with some error anlaysis!
+//This method can be used to load some information when desired to help with debugging
 void ParticleSystem::loadSpecialState()
 {
 	

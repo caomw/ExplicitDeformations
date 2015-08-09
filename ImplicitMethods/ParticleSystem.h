@@ -13,12 +13,8 @@
 #define TEXT_SIZE 256	//Maximum length of the on screen message text
 
 //Particle System class
-//It builds a grid of particles (represented by Particle objects)
-//These are then held together by springs using hooke's laws.  One edge corresponds to each spring.
-//Hooke's law is used to represent the springs, with both a spring component and a damping comopnent
-//Implicit methods are used for the integration.  This requires a solving system but allows much larger spring constants without instability
-//and potentially allows more efficient implementation
-//A gravity component is also present
+//This is the base class for all other classes derived from ParticleSystem
+//A tetrahedral mesh must be loaded.  It then allows deformations to be implemented on the mesh.
 class ParticleSystem
 {
 	public:
@@ -26,18 +22,24 @@ class ParticleSystem
 	~ParticleSystem();
 	void initVBOs();
 	void sendVBOs();
+	void invertTetra();
 	void reset();
 	virtual void doUpdate(double elapsedSeconds);
 	void doCollisionDetectionAndResponse(double deltaT);
+	void uninvertF( double * F);
 	void calculateNormals();
 	void doRender(double videoWriteDeltaT);
 	void doRender(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix);
+	void doRenderWithLighting(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix);
+	void doRenderRGB(double videoWriteDeltaT, glm::mat4 & projMatrix, glm::mat4 & floorModelViewMatrix, glm::mat4 & tetraModelViewMatrix);
 	//UI Methods
 	void increaseEarthGravity(double amount);
 	void increaseStraightRestLength(double amount);
 	void toggleInfoText();
 	void toggleFullAmbient();
 	void setWindowDimensions(int width, int height);
+	void toggleUninversion();
+	void toggleRGB();
 	void toggleAnimation();
 	void toggleRenderMode();
 	void toggleImageRendering();
@@ -46,7 +48,8 @@ class ParticleSystem
 	void loadSpecialState();
 	void setProgramObject(GLuint programObject) {this->programObject = programObject;}
 	void setEyePos(glm::vec3 & eyePos);
-	void setConstants(int K, int mu);
+	void setConstants(double K, double mu);
+	void setConstants(double K, double mu, double kd);
 
 	protected:
 	double halfWidth;					//Half the width of the original grid.  Used to make the grid initially be centered.
@@ -90,6 +93,8 @@ class ParticleSystem
 public:
 	bool isAnimating;					//True if particles should move; false if not
 protected:
+	bool doUninvert;					//True in uninversion logic turned on (currently only used in stanford system implementation)
+	bool useRGBColor;					//True if should render with RGB colors for each tetrahedron (useful for debugging inversions)
 	bool showInfoText;					//True if informational messages should be rendered on screen
 	bool showNormals;					//True if normals should be rendered onscreen
 	bool showOrg;						//True if original, undeformed vertices should be rendered on screen

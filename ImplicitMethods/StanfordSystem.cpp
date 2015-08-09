@@ -14,6 +14,7 @@ using namespace std;
 const double epsilon = 1e-12;	//Used to check approximate equality to 0
 int iteration = 1;
 
+//Constructor
 StanfordSystem::StanfordSystem(Vertex * vertexList, int vertexCount, int * tetraList, int tetraCount, Logger * logger) : ParticleSystem(vertexList, vertexCount, tetraList, tetraCount, logger)
 {
 	strcpy(text, "Method 1");
@@ -183,6 +184,7 @@ StanfordSystem::~StanfordSystem()
 	delete [] invDm;
 }
 
+//Overridden update method
 void StanfordSystem::doUpdate(double deltaT)
 {
 	#ifdef DEBUGGING
@@ -284,7 +286,29 @@ void StanfordSystem::doUpdate(double deltaT)
 	}
 	#endif
     
-    //greenStrain = (1 / 2) * (F' * F - eye(3));
+	if (doUninvert) //Avoid any processing if it's turned off
+	{
+		double FOneIndex[9];
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				FOneIndex[i*3 + j] = F[i][j];
+			}
+		}
+
+		uninvertF(FOneIndex);
+
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				F[i][j] = FOneIndex[i*3 + j];
+			}
+		}
+	}
+	
+	//greenStrain = (1 / 2) * (F' * F - eye(3));
 	//Part I: F' * F
 	double greenStrain[DIMENSION][DIMENSION];
 	for (int i = 0; i < DIMENSION; i++) //current row # of calculated final matrix element

@@ -125,6 +125,25 @@
 	  inMatrix[0][1] * inMatrix[1][0] * inMatrix[2][2] \
 	)
 
+#define determinant3By3OneBasedIndices(inMatrix) \
+	( \
+	  inMatrix[1][1] * inMatrix[2][2] * inMatrix[3][3] + \
+	  inMatrix[1][2] * inMatrix[2][3] * inMatrix[3][1] + \
+	  inMatrix[1][3] * inMatrix[2][1] * inMatrix[3][2] - \
+	  inMatrix[1][3] * inMatrix[2][2] * inMatrix[3][1] - \
+	  inMatrix[1][1] * inMatrix[2][3] * inMatrix[3][2] - \
+	  inMatrix[1][2] * inMatrix[2][1] * inMatrix[3][3] \
+	)
+
+#define determinant3By3SingleIndex(inMatrix) \
+	( \
+	  inMatrix[0*3+0] * inMatrix[1*3+1] * inMatrix[2*3+2] + \
+	  inMatrix[0*3+1] * inMatrix[1*3+2] * inMatrix[2*3+0] + \
+	  inMatrix[0*3+2] * inMatrix[1*3+0] * inMatrix[2*3+1] - \
+	  inMatrix[0*3+2] * inMatrix[1*3+1] * inMatrix[2*3+0] - \
+	  inMatrix[0*3+0] * inMatrix[1*3+2] * inMatrix[2*3+1] - \
+	  inMatrix[0*3+1] * inMatrix[1*3+0] * inMatrix[2*3+2] \
+	)
 
 #define determinant4By4(inMatrix) \
 	( \

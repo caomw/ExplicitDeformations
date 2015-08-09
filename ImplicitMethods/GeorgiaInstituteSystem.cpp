@@ -12,6 +12,7 @@ using namespace std;
 
 const double epsilon = 1e-12;	//Used to check approximate equality to 0
 
+//Constructor
 GeorgiaInstituteSystem::GeorgiaInstituteSystem(Vertex * vertexList, int vertexCount, int * tetraList, int tetraCount, Logger * logger) : ParticleSystem(vertexList, vertexCount, tetraList, tetraCount, logger)
 {
 	strcpy(text, "Method 2");
@@ -124,6 +125,7 @@ GeorgiaInstituteSystem::~GeorgiaInstituteSystem()
 
 int iter = 1;
 
+//Overriden doUpdate method
 void GeorgiaInstituteSystem::doUpdate(double deltaT)
 {
 	#ifdef DEBUGGING

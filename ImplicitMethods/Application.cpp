@@ -64,7 +64,7 @@ ViewManager viewManager;			//Instance of the view manager to allow user view con
 Keyboard * keyboard;				//Instance of the Keyboard class to process key presses
 Logger * logger;					//Instance of Logger class to perform all logging
 const int whichMethod = 1;			//1 for stanford method.  2 for georgia Institute Method.  3 for NonLinear Paper method.
-const int whichModel = 1;
+const int whichModel = 4;
 
 double ar = 0;
 
@@ -104,7 +104,7 @@ void render()
 			break;
 		}
 	}
-	else
+	else if (whichModel == 1 || whichModel == 2)
 	{
 		//Regular model of some sort - do not need quite as big of constants
 		switch (whichMethod)
@@ -125,8 +125,28 @@ void render()
 			timeElapsed = 0.005;
 			break;
 		}
-
-		
+	}
+	else 
+	{
+		//The 'simpler' tetrahedral model
+		switch (whichMethod)
+		{
+		case 1:					//Stanford Method
+			timeElapsed = 0.005;
+			particleSystem->setConstants(700,700,0.5);
+			break;
+		case 2:					//Georgia Institute Method
+			timeElapsed = 0.00225;
+			particleSystem->setConstants(700,700);
+			break;
+		case 3:					//Non Linear Paper Method
+			timeElapsed = 0.00225;
+			particleSystem->setConstants(600,600);
+			break;
+		default:
+			timeElapsed = 0.005;
+			break;
+		}
 	}
 	
 	//for (int i = 0; i < 1; i++)

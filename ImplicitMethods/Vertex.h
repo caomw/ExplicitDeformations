@@ -2,8 +2,7 @@
 
 const int DIMENSION = 3;	//Number of dimensions - 3 means 3D
 
-//This struct represents one particle
-//A particle corresponds to both a vertex in the edge system and to a vertex used in rendering triangles
+//This struct represents one vertex in a tetrahedral mesh
 struct Vertex
 {
 	Vertex()
