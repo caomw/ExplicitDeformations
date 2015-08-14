@@ -14,6 +14,9 @@ using namespace std;
 const double epsilon = 1e-12;	//Used to check approximate equality to 0
 int iteration = 1;
 
+//Based on the paper at http://www.math.ucla.edu/~jteran/papers/TSNF03.pdf – Finite Volume Methods for the Simulation of Skeletal Muscle
+//By R. Fedkiw et. al
+
 //Constructor
 StanfordSystem::StanfordSystem(Vertex * vertexList, int vertexCount, int * tetraList, int tetraCount, Logger * logger) : ParticleSystem(vertexList, vertexCount, tetraList, tetraCount, logger)
 {
@@ -341,6 +344,7 @@ void StanfordSystem::doUpdate(double deltaT)
 	}
 	#endif
 
+	//3D Hooke's Law based on: https://en.wikipedia.org/w/index.php?title=Hooke%27s_law&oldid=673340434
 
     //display('The green stress tensor is:');
     //display(greenStrain);

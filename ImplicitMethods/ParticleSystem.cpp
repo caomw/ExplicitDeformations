@@ -16,11 +16,6 @@
 
 using namespace std;
 
-//Based on:
-//http://graphics.snu.ac.kr/~kjchoi/publication/cloth.pdf - Explicit and implicit formulas for hooke's law - page 3
-//http://www.amath.unc.edu/Faculty/mucha/Reprints/SCAclothcontrolpreprint.pdf - Formulas for A and b in Ax = b system - page 5
-//http://en.wikipedia.org/wiki/Conjugate_gradient - Algorithm for conjugate gradient (solves Ax = b)
-
 const double epsilon = 1e-12;	//Used to check approximate equality to 0
 extern const int DIMENSION;		//DIMENSION of system (3 for 3D)
 
@@ -328,7 +323,7 @@ void ParticleSystem::doCollisionDetectionAndResponse(double deltaT)
 				}
 				#endif
 				
-				//%From: http://gafferongames.com/virtualgo/collision-response-and-coulomb-friction/
+				//%Linear impulse based on: http://gafferongames.com/virtualgo/collision-response-and-coulomb-friction/
 				//j = max(-(1 + restitution) * dot(inVelocities(:,k), [0 1 0]'), 0); %Magnitude of reaction force without rotational inertia
 
 				double verticalNormal[3] = {0, 1, 0};
@@ -351,6 +346,9 @@ void ParticleSystem::doCollisionDetectionAndResponse(double deltaT)
 					cout << "jr is: " << jr << endl;
 				}
 				#endif
+
+				//Static / Dynamic Friction based on Gravitas: An extensible physics engine framework using object- oriented and design pattern-driven software architecture principles, by Colin Vella
+				//https://drive.google.com/file/d/0Bze6mKYvrpOKYjdkODVhMTAtM2Q4Zi00NzgyLWE2YzMtN2MwZmQ4NjA3OWMw/view?ddrp=1&pli=1&hl=en
 
 				//js = us * j;
 				//jd = ud * j;
@@ -459,7 +457,7 @@ void ParticleSystem::doCollisionDetectionAndResponse(double deltaT)
 
 }
 
-//This method uses the SVD to uninvert F based on the paper by Fedkiw
+//This method uses the SVD to uninvert F based on the paper by Fedkiw et al
 //F is the matrix representing the change in the deformed vertices versus the original vertices
 //Algorithm is based directly on the paper at: http://physbam.stanford.edu/~fedkiw/papers/stanford2004-04.pdf
 void ParticleSystem::uninvertF( double * F)

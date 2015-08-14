@@ -3,6 +3,8 @@
 
 using namespace std;
 
+//Meshes from and format based on: http://www.cs.berkeley.edu/~jrs/stellar/#anims
+
 //This method opens the stellar file but does not start reading it
 bool TetraMeshReader::openFile(char * nodeFileName, char * elementFileName)
 {

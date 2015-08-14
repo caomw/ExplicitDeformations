@@ -8,9 +8,10 @@ using namespace std;
 
 #include "Macros.h"
 
-
-
 const double epsilon = 1e-12;	//Used to check approximate equality to 0
+
+//Based on the paper at http://graphics.berkeley.edu/papers/Obrien-GMA-1999-08/Obrien-GMA-1999-08.pdf – Graphical Modeling and Animation of Brittle Fracture
+//By James O'Brien and Jessica Hodgkins
 
 //Constructor
 GeorgiaInstituteSystem::GeorgiaInstituteSystem(Vertex * vertexList, int vertexCount, int * tetraList, int tetraCount, Logger * logger) : ParticleSystem(vertexList, vertexCount, tetraList, tetraCount, logger)

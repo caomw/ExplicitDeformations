@@ -9,6 +9,9 @@ using namespace std;
 
 const double epsilon = 1e-12;	//Used to check approximate equality to 0
 
+//Based on the paper at http://www-ljk.imag.fr/Publications/Basilic/com.lmc.publi.PUBLI_Article@11f6a0378d9_18c74/tensile.pdf – Simple, yet Accurate Nonlinear Tensile Stiffness
+//Pascal Volino et. al
+
 //Constructor
 NonlinearMethodSystem::NonlinearMethodSystem(Vertex * vertexList, int vertexCount, int * tetraList, int tetraCount, Logger * logger) : ParticleSystem(vertexList, vertexCount, tetraList, tetraCount, logger)
 {
@@ -237,6 +240,8 @@ void NonlinearMethodSystem::doUpdate(double deltaT)
 			}
 		}
 		#endif
+
+		//3D Hooke's Law based on: https://en.wikipedia.org/w/index.php?title=Hooke%27s_law&oldid=673340434
 
 		//voigtStrain = [Euu Evv Eww 2 * Evw 2 * Euw 2 * Euv]';
 
